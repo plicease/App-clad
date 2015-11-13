@@ -52,6 +52,7 @@ sub new
     config     => $config,
     server     => 0,
     verbose    => 0,
+    serial     => 0,
     next_color => -1,
   }, $class;
   
@@ -63,6 +64,7 @@ sub new
     'l=s'     => \$self->{user},
     'server'  => \$self->{server},
     'verbose' => \$self->{verbose},
+    'serial'  => \$self->{serial},
     'help|h'  => sub { pod2usage({ -verbose => 2}) },
     'version' => sub {
       say STDERR 'App::clad version ', ($App::clad::VERSION // 'dev');
@@ -102,6 +104,7 @@ sub command        { shift->{command}     }
 sub user           { shift->{user}        }
 sub server         { shift->{server}      }
 sub verbose        { shift->{verbose}     }
+sub serial         { shift->{serial}      }
 sub server_command { shift->config->server_command( default => 'clad --server' ) }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
@@ -186,6 +189,15 @@ sub run
         $color = 0 unless $self->color;
       
         my $ipc = AnyEvent::Open3::Simple->new(
+          on_start => sub {
+            my($proc, $program, @args) = @_;
+            $self->print_line(
+              $color //= $self->next_color,
+              $prefix,
+              'star',
+              " % $program @args"
+            ) if $self->verbose;
+          },
           on_stdout => sub {
             my($proc, $line) = @_;
             $self->print_line(
@@ -246,7 +258,7 @@ sub run
           \$payload,
         );
         
-        push @done, $done;
+        $self->serial ? $done->recv : push @done, $done;
       }
     }
   }
@@ -271,15 +283,15 @@ sub run_server
   if($? == -1)
   {
     say STDERR "failed to execute on @{[ hostname ]}";
-    exit 2;
+    return 2;
   }
   elsif($? & 127)
   {
     say STDERR "died with signal @{[ $? & 127 ]} on @{[ hostname ]}";
-    exit 2;
+    return 2;
   }
   
-  exit $? >> 8;
+  return $? >> 8;
 }
 
 1;
