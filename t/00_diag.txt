@@ -1,8 +1,9 @@
+AE
 AnyEvent::Open3::Simple
 Capture::Tiny
 Clustericious::Config
 EV
 ExtUtils::MakeMaker
-Test::Clustericious::Config
 Test::Exit
 Test::More
+YAML::XS

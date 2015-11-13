@@ -50,9 +50,9 @@ subtest 'help' => sub {
 };
 
 subtest 'version' => sub {
-  plan tests => 2;
+  plan tests => 1;
 
-  foreach my $arg (qw( --version -v ))
+  foreach my $arg (qw( --version ))
   {
     subtest $arg => sub {
       plan tests => 2;
