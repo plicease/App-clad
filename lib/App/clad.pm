@@ -43,10 +43,10 @@ sub main
 sub new
 {
   my $class = shift;
-  
+
   my $self = bless {
     dry_run    => 0,
-    color      => 1,
+    color      => -t STDOUT,
     server     => 0,
     verbose    => 0,
     serial     => 0,
