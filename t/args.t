@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Test::Clustericious::Config;
 use Test::Exit;
-use Test::More tests => 9;
+use Test::More tests => 12;
 use App::clad;
 use Capture::Tiny qw( capture );
 
@@ -87,4 +87,26 @@ subtest 'invalid cluster with user' => sub {
   is $exit, 2, 'exit = 2';
   note "[err]\n$err";
   like $err, qr{unknown cluster: foo}, "diagnostic";
+};
+
+subtest 'server' => sub {
+
+  is(App::clad->new('--server')->server, 1, 'clad.server = 1');
+  is(App::clad->new('cluster1','uptime')->server, 0, 'clad.server = 0');
+};
+
+subtest 'verbose' => sub {
+  plan tests => 2;
+
+  is(App::clad->new('--verbose', 'cluster1', 'echo')->verbose, 1, '--verbose on');
+  is(App::clad->new('cluster1', 'echo')->verbose,       0, '--verbose off');
+
+};
+
+subtest 'serial' => sub {
+  plan tests => 2;
+
+  is(App::clad->new('--serial', 'cluster1', 'echo')->serial, 1, '--serial on');
+  is(App::clad->new('cluster1', 'echo')->serial,       0, '--serial off');
+
 };

@@ -44,12 +44,9 @@ sub new
 {
   my $class = shift;
   
-  my $config = Clustericious::Config->new('Clad');
-  
   my $self = bless {
     dry_run    => 0,
     color      => 1,
-    config     => $config,
     server     => 0,
     verbose    => 0,
     serial     => 0,
@@ -58,19 +55,24 @@ sub new
   
   local @ARGV = @_;
   
+  my $config_name = 'Clad';
+  
   GetOptions(
-    'n'       => \$self->{dry_run},
-    'a'       => sub { $self->{color} = 0 },
-    'l=s'     => \$self->{user},
-    'server'  => \$self->{server},
-    'verbose' => \$self->{verbose},
-    'serial'  => \$self->{serial},
-    'help|h'  => sub { pod2usage({ -verbose => 2}) },
-    'version' => sub {
+    'n'        => \$self->{dry_run},
+    'a'        => sub { $self->{color} = 0 },
+    'l=s'      => \$self->{user},
+    'server'   => \$self->{server},
+    'verbose'  => \$self->{verbose},
+    'serial'   => \$self->{serial},
+    'config=s' => \$config_name,
+    'help|h'   => sub { pod2usage({ -verbose => 2}) },
+    'version'  => sub {
       say STDERR 'App::clad version ', ($App::clad::VERSION // 'dev');
       exit 1;
     },
   ) || pod2usage(1);
+  
+  $self->{config} = Clustericious::Config->new($config_name);
   
   return $self if $self->server;
   
@@ -111,12 +113,6 @@ sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHo
                                                                  -o => 'BatchMode=yes',
                                                                  -o => 'PasswordAuthentication=no',
                                                                  '-T', ] ) }
-
-#sub ac
-#{
-#  my($self, $color) = @_;
-#  Term::ANSIColor::color($color) if $self->color;
-#}
 
 sub host_length
 {
