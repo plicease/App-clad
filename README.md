@@ -30,6 +30,23 @@ login shell for the remote user.
 
     Specify a login name for all ssh connections.
 
+- --verbose
+
+    Print out a lot of debugging information which may be useful in debugging issues with clad.
+
+- --serial
+
+    Force clad to wait for the command to finish on each host before continuing to the next.  This
+    will be slower, but may be easier to read the output.
+
+- --help
+
+    Print help and exit.
+
+- --version
+
+    Print the version and exit.
+
 # AUTHOR
 
 Graham Ollis &lt;plicease@cpan.org>

@@ -43,6 +43,23 @@ Do not colorize the host names in the output.
 
 Specify a login name for all ssh connections.
 
+=item --verbose
+
+Print out a lot of debugging information which may be useful in debugging issues with clad.
+
+=item --serial
+
+Force clad to wait for the command to finish on each host before continuing to the next.  This
+will be slower, but may be easier to read the output.
+
+=item --help
+
+Print help and exit.
+
+=item --version
+
+Print the version and exit.
+
 =back
 
 =cut

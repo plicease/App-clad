@@ -8,16 +8,12 @@ use File::Temp qw( tempdir );
 use File::Spec;
 use YAML::XS qw( DumpFile Load );
 
-eval {
-  package
-    Sys::Hostname;
-  
-  use base qw( Exporter );
-  our @EXPORT_OK = qw( hostname );
-  
-  sub hostname { 'myfakehostname' }
+do {
+  no warnings;
+  sub Sys::Hostname::hostname {
+    'myfakehostname';
+  }
 };
-die $@ if $@;
 
 require_ok 'App::clad';
 
