@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.010;
 use Test::Clustericious::Config;
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
 use File::Spec;
@@ -126,4 +126,16 @@ subtest 'verbose' => sub {
   is $data->{verbose}, 1, 'verbose = 1';
   
   note $err;
+};
+
+subtest 'bad exe' => sub {
+
+  generate_stdin {
+    env => {},
+    command => [ 'boguscommand', 'bogus arguments' ],
+  };
+  
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  is $exit, 2, 'returns 2';
+  like $err, qr{failed to execute on myfakehostname}, 'diagnostic';
 };
