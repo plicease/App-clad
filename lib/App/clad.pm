@@ -86,8 +86,7 @@ sub new
   {
     if(ref $expanded)
     {
-      shift @{ $self->command };
-      unshift @{ $self->command }, @$expanded;
+      splice @{ $self->command }, 0, 1, @$expanded;
     }
     else
     {
