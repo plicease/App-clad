@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.010;
 use Test::Clustericious::Config;
-use Test::More tests => 7;
+use Test::More tests => 11;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
 use Path::Class qw( file );
@@ -134,4 +134,58 @@ subtest 'bad exe' => sub {
   my($out, $err, $exit) = capture { App::clad->new('--server')->run };
   is $exit, 2, 'returns 2';
   like $err, qr{failed to execute on myfakehostname}, 'diagnostic';
+};
+
+subtest 'bad yaml' => sub {
+  plan tests => 3;
+
+  generate_stdin {
+    env     => {},
+    command => [ 'bogus' ],
+  };
+  getc STDIN;
+  
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  is $exit, 2, 'returns 2';
+
+  like $err, qr{Clad Server: side YAML Error:}, 'summary';  
+  like $err, qr{payload:}, 'payload header';
+
+};
+
+subtest 'no command' => sub {
+  plan tests => 2;
+
+  generate_stdin {
+  };
+  
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  is $exit, 2, 'returns 2';
+  like $err, qr{Clad Server: Unable to find command}, 'diagnostic';
+};
+
+subtest 'no command (2)' => sub {
+  plan tests => 2;
+
+  generate_stdin {
+    command => [],
+  };
+  
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  is $exit, 2, 'returns 2';
+  like $err, qr{Clad Server: Unable to find command}, 'diagnostic';
+};
+
+subtest 'bad env' => sub {
+  plan tests => 2;
+
+  generate_stdin {
+    env     => [],
+    command => ['foo'],
+  };
+
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  is $exit, 2, 'returns 2';
+  like $err, qr{Clad Server: env is not hash}, 'diagnostic';
+
 };

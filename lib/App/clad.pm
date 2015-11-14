@@ -229,9 +229,31 @@ sub run_server
 {
   my($self) = @_;
   
-  my $input = Load(do { local $/; <STDIN> });
+  my $raw = do { local $/; <STDIN> };
+  my $input = eval { Load($raw) };
+  
+  if(my $yaml_error = $@)
+  {
+    say STDERR "Clad Server: side YAML Error:";
+    say STDERR $yaml_error;
+    say STDERR "payload:";
+    say STDERR $raw;
+    return 2;
+  }
   
   print STDERR Dump($input) if $input->{verbose};
+
+  if(ref $input->{command} ne 'ARRAY' || @{ $input->{command} } == 0)
+  {
+    say STDERR "Clad Server: Unable to find command";
+    return 2;
+  }
+  
+  if(defined $input->{env} && ref $input->{env} ne 'HASH')
+  {
+    say STDERR "Clad Server: env is not hash";
+    return 2;
+  }
   
   $ENV{$_} = $input->{env}->{$_} for keys %{ $input->{env} };
   
@@ -239,12 +261,12 @@ sub run_server
   
   if($? == -1)
   {
-    say STDERR "failed to execute on @{[ hostname ]}";
+    say STDERR "Clad Server: failed to execute on @{[ hostname ]}";
     return 2;
   }
   elsif($? & 127)
   {
-    say STDERR "died with signal @{[ $? & 127 ]} on @{[ hostname ]}";
+    say STDERR "Clad Server: died with signal @{[ $? & 127 ]} on @{[ hostname ]}";
     return 2;
   }
   
@@ -258,6 +280,8 @@ use warnings;
 use AE;
 use AnyEvent::Open3::Simple 0.76;
 use YAML::XS qw( Dump );
+
+# VERSION
 
 sub new
 {
