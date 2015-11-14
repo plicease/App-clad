@@ -5,7 +5,7 @@ use Test::More;
 use App::clad;
 use Capture::Tiny qw( capture );
 
-BEGIN { plan skip_all => 'test requires Test::Exit' unless eval qq{ use Test::Exit } }
+BEGIN { plan skip_all => 'test requires Test::Exit' unless eval qq{ use Test::Exit; 1 } }
 
 plan tests => 12;
 
