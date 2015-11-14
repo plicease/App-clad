@@ -1,10 +1,13 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::Exit;
-use Test::More tests => 12;
+use Test::More;
 use App::clad;
 use Capture::Tiny qw( capture );
+
+BEGIN { plan skip_all => 'test requires Test::Exit' unless eval qq{ use Test::Exit } }
+
+plan tests => 12;
 
 create_config_ok 'Clad', {
   env => {
