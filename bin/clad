@@ -109,6 +109,11 @@ This is the C<ssh> command to use on the client side.  It is C<ssh> by default.
 These are the C<ssh> options used when opening a connection to the server.  The default
 may change as needed.
 
+=head2 ssh_extra
+
+Extra ssh command line options to be added after C<ssh_options>.  If you just want to
+add a few options without replacing the existing set, this is the way to go.
+
 =head2 colors
 
 A list of colors as understood by L<Term::ANSIColor> which are used in alteration

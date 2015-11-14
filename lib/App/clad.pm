@@ -128,6 +128,7 @@ sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHo
                                                                  -o => 'BatchMode=yes',
                                                                  -o => 'PasswordAuthentication=no',
                                                                  '-T', ] ) }
+sub ssh_extra      { shift->config->ssh_extra(      default => [] ) }
 
 sub ret
 {
@@ -300,6 +301,7 @@ sub new
   $ipc->run(
     $clad->ssh_command,
     $clad->ssh_options,
+    $clad->ssh_extra,
     ($args{user} ? ('-l' => $args{user}) : ()),
     $args{host},
     $clad->server_command,

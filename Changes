@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Added ssh_extra configuration useful for
+    appending to ssh_options
 
 0.99_01   2015-11-13 22:04:58 -0500
   - Complete rewrite from scratch.  List
