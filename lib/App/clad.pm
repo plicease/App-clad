@@ -38,6 +38,8 @@ sub main
   $clad->run;
 }
 
+# this hook is used for testing
+# see t/args.t subtest 'color'
 our $_stdout_is_terminal = sub { -t STDOUT };
 
 sub new
