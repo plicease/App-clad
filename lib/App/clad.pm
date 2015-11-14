@@ -5,8 +5,6 @@ use warnings;
 use 5.010;
 use Getopt::Long qw( GetOptions );
 use Pod::Usage qw( pod2usage );
-use AE;
-use AnyEvent::Open3::Simple 0.76;
 use Clustericious::Config 1.03;
 use YAML::XS qw( Dump Load );
 use Term::ANSIColor ();
@@ -53,6 +51,7 @@ sub new
     verbose    => 0,
     serial     => 0,
     next_color => -1,
+    ret        => 0,
   }, $class;
   
   local @ARGV = @_;
@@ -116,6 +115,13 @@ sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHo
                                                                  -o => 'PasswordAuthentication=no',
                                                                  '-T', ] ) }
 
+sub ret
+{
+  my($self, $new) = @_;
+  $self->{ret} = $new if defined $new;
+  $self->{ret};
+}
+
 sub host_length
 {
   my($self) = @_;
@@ -138,16 +144,6 @@ sub host_length
   }
   
   $self->{host_length};
-}
-
-sub print_line
-{
-  my($self, $color, $prefix, $code, $line) = @_;
-  
-  print Term::ANSIColor::color($color) if $self->color;
-  printf "[%@{[ $self->host_length ]}s %4s] ", $prefix, $code;
-  print Term::ANSIColor::color('reset') if $self->color;
-  print $line, "\n";
 }
 
 sub next_color
@@ -183,79 +179,15 @@ sub run
       }
       else
       {
-        my $done = AE::cv;
-        my $color;
-        $color = 0 unless $self->color;
-      
-        my $ipc = AnyEvent::Open3::Simple->new(
-          on_start => sub {
-            my($proc, $program, @args) = @_;
-            $self->print_line(
-              $color //= $self->next_color,
-              $prefix,
-              'star',
-              " % $program @args"
-            ) if $self->verbose;
-          },
-          on_stdout => sub {
-            my($proc, $line) = @_;
-            $self->print_line(
-              $color //= $self->next_color,
-              $prefix,
-              'out ',
-              $line,
-            );
-          },
-          on_stderr => sub {
-            my($proc, $line) = @_;
-            $self->print_line(
-              $color //= $self->next_color,
-              $prefix,
-              'err ',
-              $line,
-            );
-          },
-          on_exit => sub {
-            my($proc, $exit, $signal) = @_;
-            $color //= $self->next_color;
-            $self->print_line(
-              $color,
-              $prefix,
-              'exit',
-              "$exit",
-            ) if $exit;
-            $self->print_line(
-              $color,
-              $prefix,
-              'sig',
-              "$signal",
-            ) if $signal;
-            $ret = 2 if $exit || $signal;
-            $done->send;
-          },
-          on_error => sub {
-            my($error) = @_;
-            $color //= $self->next_color;
-            say "[$prefix fail] $error";
-            $ret = 2;
-            $done->send;
-          },
+        my $remote = Clustericious::Admin::RemoteHandler->new(
+          prefix => $prefix,
+          clad   => $self,
+          env    => \%env,
+          user   => $user,
+          host   => $host,
         );
 
-        my $payload = Dump({
-          env     => \%env,
-          command => $self->command,
-          verbose => $self->verbose,
-        });
-
-        $ipc->run(
-          $self->ssh_command,
-          $self->ssh_options,
-          ($user ? ('-l' => $user) : ()), 
-          $host,
-          $self->server_command,
-          \$payload,
-        );
+        my $done = $remote->cv;
         
         $self->serial ? $done->recv : push @done, $done;
       }
@@ -264,7 +196,7 @@ sub run
   
   $_->recv for @done;
   
-  $ret;
+  $self->ret;
 }
 
 sub run_server
@@ -292,5 +224,103 @@ sub run_server
   
   return $? >> 8;
 }
+
+package Clustericious::Admin::RemoteHandler;
+
+use strict;
+use warnings;
+use AE;
+use AnyEvent::Open3::Simple 0.76;
+use YAML::XS qw( Dump );
+
+sub new
+{
+  my($class, %args) = @_;
+  
+  # args: prefix, clad, env, user, host
+  
+  my $self = bless {
+    prefix => $args{prefix},
+    clad   => $args{clad},
+    cv     => AE::cv,
+  }, $class;
+  
+  my $clad = $args{clad};
+  
+  my $done = $self->{cv};
+  
+  my $ipc = AnyEvent::Open3::Simple->new(
+    on_start => sub {
+      my($proc, $program, @args) = @_;
+      $self->print_line(star => "% $program @args") if $clad->verbose;
+    },
+    on_stdout => sub {
+      my($proc, $line) = @_;
+      $self->print_line(out => $line);
+    },
+    on_stderr => sub {
+      my($proc, $line) = @_;
+      $self->print_line(err => $line);
+    },
+    on_exit => sub {
+      my($proc, $exit, $signal) = @_;
+      $self->print_line(exit => $exit) if $exit;
+      $self->print_line(sig  => $signal) if $signal;
+      $clad->ret(2) if $exit || $signal;
+      $done->send;
+    },
+    on_error => sub {
+      my($error) = @_;
+      $self->print_line(fail => $error);
+      $clad->ret(2);
+      $done->send;
+    },
+  );
+  
+  my $payload = Dump({
+    env     => $args{env},
+    command => $clad->command,
+    verbose => $clad->verbose,
+  });
+  
+  $ipc->run(
+    $clad->ssh_command,
+    $clad->ssh_options,
+    ($args{user} ? ('-l' => $args{user}) : ()),
+    $args{host},
+    $clad->server_command,
+    \$payload,
+  );
+  
+  $self;
+}
+
+sub clad   { shift->{clad} }
+sub prefix { shift->{prefix} }
+
+sub color
+{
+  my($self) = @_;
+  $self->{color} //= $self->clad->next_color;
+}
+
+sub is_color
+{
+  my($self) = @_;
+  $self->{is_color} //= $self->clad->color;
+}
+
+sub print_line
+{
+  my($self, $code, $line) = @_;
+  
+  print Term::ANSIColor::color($self->color) if $self->is_color;
+  $DB::single = 1;
+  printf "[%@{[ $self->clad->host_length ]}s %-4s] ", $self->prefix, $code;
+  print Term::ANSIColor::color('reset') if $self->is_color;
+  print $line, "\n";
+}
+
+sub cv { shift->{cv} }
 
 1;
