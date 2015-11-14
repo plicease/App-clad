@@ -3,6 +3,9 @@ Revision history for {{$dist->name}}
 {{$NEXT}}
   - Added ssh_extra configuration useful for
     appending to ssh_options
+  - Deprecate "aliases" in the configuration file
+    in favor of "alias".  "aliases" will be removed
+    on or after January 13, 2016.
 
 0.99_01   2015-11-13 22:04:58 -0500
   - Complete rewrite from scratch.  List

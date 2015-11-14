@@ -1,9 +1,10 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 7;
+use Test::More tests => 9;
 use App::clad;
 use YAML::XS qw( Dump );
+use Capture::Tiny qw( capture );
 
 create_config_ok Clad1 => {
   env => {},
@@ -26,7 +27,7 @@ create_config_ok Clad => {
     cluster1 => [ qw( host1 host2 host3 ) ],
     cluster2 => [ qw( host4 host5 host6 ) ],
   },
-  aliases => {
+  alias => {
     foo => 'my foo alias',
     bar => [ qw( my bar alias ) ],
   },
@@ -55,4 +56,24 @@ subtest 'with alias used list ref' => sub {
   plan tests => 1;
   my $clad = App::clad->new('cluster1' => 'bar', 'two', 'three');
   is_deeply $clad->command, [ qw( my bar alias two three ) ], 'command = my bar alias two three';
+};
+
+create_config_ok Clad2 => {
+  env => {},
+  clusters => {
+    cluster1 => [ qw( host1 host2 host3 ) ],
+    cluster2 => [ qw( host4 host5 host6 ) ],
+  },
+  aliases => {
+    foo => 'my foo alias',
+    bar => [ qw( my bar alias ) ],
+  },
+};
+
+subtest 'deprecation warning' => sub {
+  plan tests => 2;
+  my($out, $err, $clad) = capture { App::clad->new('--config' => 'Clad2', 'cluster1' => 'uptime') };
+  my %alias =$clad->alias;
+  is_deeply \%alias, { foo => 'my foo alias', bar => [ qw( my bar alias ) ] }, 'no aliases';
+  like $err, qr{use of aliases key in configuration is deprecated, use alias instead}, 'deprecation warning';
 };

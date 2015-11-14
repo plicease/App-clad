@@ -73,11 +73,14 @@ and the lists are the host names.  For example:
         - host3
         - host4
 
-## aliases
+## alias
 
 Hash of aliases.  This is a useful place to specify common shortcuts.  The values
 in this hash may be either strings or lists, allowing you to use the list or scalar
 form of system.
+
+The old key (now deprecated) `aliases` is also recognized, if `alias` is not
+specified.  This deprecated key will be removed on or after January 31 2016.
 
 ## server\_command
 
@@ -93,6 +96,11 @@ This is the `ssh` command to use on the client side.  It is `ssh` by default.
 
 These are the `ssh` options used when opening a connection to the server.  The default
 may change as needed.
+
+## ssh\_extra
+
+Extra ssh command line options to be added after `ssh_options`.  If you just want to
+add a few options without replacing the existing set, this is the way to go.
 
 ## colors
 
@@ -122,7 +130,7 @@ Here is an example configuration
         - db3
         - db4
     
-    aliases:
+    alias:
       config_init: git clone git1:/cm/config-$CLUSTER.git ~/etc
       config_update: cd ~/etc && git pull
       config_destory: rm -rf ~/etc
@@ -207,7 +215,7 @@ them using [clad](https://metacpan.org/pod/clad).
 For example, to initialize the configuration directory using the &lt;config\_init> alias:
 
     ---
-    aliases:
+    alias:
       config_init: git clone git1:/cm/config-$CLUSTER.git ~/etc
 
 and run:
@@ -217,7 +225,7 @@ and run:
 ...we can update using the `config_update` alias:
 
     ---
-    aliases:
+    alias:
       config_update: cd ~/etc && git pull
 
 and run:
@@ -228,7 +236,7 @@ and run:
 Since the master configuration is stored in git this may not be disaster.
 
     ---
-    aliases:
+    alias:
       config_destory: rm -rf ~/etc
 
 and run:
