@@ -4,7 +4,7 @@ Parallel SSH client
 
 # SYNOPSIS
 
-    clad [-n] [-a] [-l user] <cluster> <command>
+    clad <cluster> <command>
 
 # DESCRIPTION
 
