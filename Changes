@@ -1,4 +1,49 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
-  - initial version
+
+0.99_01   2015-11-13 22:04:58 -0500
+  - Complete rewrite from scratch.  List
+    of (probably not exhaustive) changes
+    to follow.
+  - No support for macros.  These seem to have been
+    documented in Clustericious::Admin, but
+    not actually implemented.
+  - Use of single argument or list version of
+    system on the server side.  See EXAMPLES 
+    for details.
+  - Environment variables are more accurately passed
+    to the server side when you are using shell
+    logic operators (||, &&, etc) pipes ( | ).
+  - Clustericious::Admin is no longer a public interface
+    to clad.  It wasn't ever really inteded to be so,
+    but it did include some documentation.  A public
+    interface may be added here later.
+  - Clustericious::Admin is an empty package included
+    for dependency compatibility only.  The machinery
+    for the app has been moved into App::clad.
+  - App::clad and the clad executable is used on both
+    the client AND the server.  This makes it more
+    reliable, but does require that it be installed on
+    both hosts, where before it only needed to be
+    on the client.
+  - This implementation uses AnyEvent::Open3::Simple and
+    is object oriented to make the code easier to maintain.
+
+0.25      2014-12-20 05:43:02 America/New_York
+  - cpantesters do not report on older Perls
+
+0.24      2014-08-19 16:17:41 America/New_York
+  - migrate to Dist::Zilla
+  - better documentation coverage
+  - do not use ansi color if standard out is not a terminal
+
+0.23 Mon Aug 19 07:36:09 EDT 2013
+  - increment version number this time
+
+0.22 Mon Aug 19 07:34:14 EDT 2013
+  - minor documentation tweaks
+
+0.21 Mon Nov  5 12:29:52 EST 2012
+  - first public release
+
