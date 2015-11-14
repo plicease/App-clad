@@ -46,6 +46,7 @@ subtest 'exits' => sub {
     generate_stdin {
       env     => {},
       command => [ $^X, -E => "exit 0" ],
+      version => 'dev',
     };
     my($out, $err, $exit) = capture { App::clad->new('--server')->run };
     is $exit, 0, 'returns 0';
@@ -56,6 +57,7 @@ subtest 'exits' => sub {
     generate_stdin {
       env     => {},
       command => [ $^X, -E => "exit 22" ],
+      version => 'dev',
     };
     my($out, $err, $exit) = capture { App::clad->new('--server')->run };
     is $exit, 22, 'returns 22';
@@ -66,6 +68,7 @@ subtest 'exits' => sub {
     generate_stdin {
       env     => {},
       command => [ $^X, -E => "kill 9, \$\$" ],
+      version => 'dev',
     };
     my($out, $err, $exit) = capture { App::clad->new('--server')->run };
     is $exit, 2, 'returns 2';
@@ -80,6 +83,7 @@ subtest 'io' => sub {
 
   generate_stdin {
     env => {},
+    version => 'dev',
     command => [ $^X, -E => "say 'something to out'; say STDERR 'something to err'" ],
   };
 
@@ -94,6 +98,7 @@ subtest 'env' => sub {
 
   generate_stdin {
     env => { FOO => 'bar' },
+    version => 'dev',
     command => [ $^X, -E => 'say "env:FOO=$ENV{FOO}:"' ],
   };
 
@@ -109,6 +114,7 @@ subtest 'verbose' => sub {
     verbose => 1,
     env     => { FOO => 1, BAR => 2 },
     command => [ $^X, -E => '' ],
+    version => 'dev',
   };
 
   my($out, $err, $exit) = capture { App::clad->new('--server')->run };
@@ -129,6 +135,7 @@ subtest 'bad exe' => sub {
   generate_stdin {
     env => {},
     command => [ 'boguscommand', 'bogus arguments' ],
+    version => 'dev',
   };
   
   my($out, $err, $exit) = capture { App::clad->new('--server')->run };
@@ -142,6 +149,7 @@ subtest 'bad yaml' => sub {
   generate_stdin {
     env     => {},
     command => [ 'bogus' ],
+    version => 'dev',
   };
   getc STDIN;
   
@@ -157,6 +165,7 @@ subtest 'no command' => sub {
   plan tests => 2;
 
   generate_stdin {
+    version => 'dev',
   };
   
   my($out, $err, $exit) = capture { App::clad->new('--server')->run };
@@ -169,6 +178,7 @@ subtest 'no command (2)' => sub {
 
   generate_stdin {
     command => [],
+    version => 'dev',
   };
   
   my($out, $err, $exit) = capture { App::clad->new('--server')->run };
@@ -182,6 +192,7 @@ subtest 'bad env' => sub {
   generate_stdin {
     env     => [],
     command => ['foo'],
+    version => 'dev',
   };
 
   my($out, $err, $exit) = capture { App::clad->new('--server')->run };

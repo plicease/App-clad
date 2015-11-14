@@ -255,6 +255,12 @@ sub run_server
     return 2;
   }
   
+  unless($input->{version})
+  {
+    say STDERR "Clad Server: no client version";
+    return 2;
+  }
+  
   $ENV{$_} = $input->{env}->{$_} for keys %{ $input->{env} };
   
   system @{ $input->{command} };
@@ -331,6 +337,7 @@ sub new
     env     => $args{env},
     command => $clad->command,
     verbose => $clad->verbose,
+    version => $App::clad::VERSION // 'dev',
   });
   
   $ipc->run(
