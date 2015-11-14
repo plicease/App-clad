@@ -5,8 +5,8 @@ use Test::Clustericious::Config;
 use Test::More tests => 7;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
-use File::Spec;
-use YAML::XS qw( DumpFile Load );
+use Path::Class qw( file );
+use YAML::XS qw( Dump Load );
 
 do {
   no warnings;
@@ -34,8 +34,8 @@ create_config_ok 'Clad', {
 sub generate_stdin ($)
 {
   my($data) = @_;
-  my $fn = File::Spec->catfile( tempdir( CLEANUP => 1 ), "stdin.yml");
-  DumpFile($fn, $data);
+  my $fn = file( tempdir( CLEANUP => 1 ), "stdin.yml");
+  $fn->spew(Dump($data));
   open STDIN, '<', $fn;
 }
 

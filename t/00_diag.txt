@@ -4,6 +4,8 @@ Capture::Tiny
 Clustericious::Config
 EV
 ExtUtils::MakeMaker
+File::HomeDir
+Path::Class
 Test::Exit
 Test::More
 YAML::XS

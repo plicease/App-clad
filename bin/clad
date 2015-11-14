@@ -62,4 +62,12 @@ Print the version and exit.
 
 =back
 
+=head1 ENVIRONMENT
+
+=head2 CLAD_CLUSTER
+
+This environment variable is set to the cluster name from the 
+configuration file on each node that the command is run.  The deprecated
+C<CLUSTER> is also set, though that may be removed in a future version.
+
 =cut

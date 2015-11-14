@@ -47,6 +47,14 @@ login shell for the remote user.
 
     Print the version and exit.
 
+# ENVIRONMENT
+
+## CLAD\_CLUSTER
+
+This environment variable is set to the cluster name from the 
+configuration file on each node that the command is run.  The deprecated
+`CLUSTER` is also set, though that may be removed in a future version.
+
 # AUTHOR
 
 Graham Ollis &lt;plicease@cpan.org>

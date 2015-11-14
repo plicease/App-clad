@@ -40,13 +40,15 @@ sub main
   $clad->run;
 }
 
+our $_stdout_is_terminal = sub { -t STDOUT };
+
 sub new
 {
   my $class = shift;
 
   my $self = bless {
     dry_run    => 0,
-    color      => -t STDOUT,
+    color      => $_stdout_is_terminal->(),
     server     => 0,
     verbose    => 0,
     serial     => 0,
@@ -169,7 +171,8 @@ sub run
     my $user = $cluster =~ s/^(.*)@// ? $1 : $self->user;
 
     my %env = $self->config->env;
-    $env{CLUSTER} //= $cluster;
+    $env{CLUSTER}      //= $cluster; # deprecate
+    $env{CLAD_CLUSTER} //= $cluster;
 
     foreach my $host (@{ $self->config->clusters->{$cluster} })
     {
@@ -244,10 +247,10 @@ sub run
           command => $self->command,
           verbose => $self->verbose,
         });
-        
+
         $ipc->run(
-          $self->ssh_command, 
-          @{ $self->ssh_options }, 
+          $self->ssh_command,
+          $self->ssh_options,
           ($user ? ('-l' => $user) : ()), 
           $host,
           $self->server_command,

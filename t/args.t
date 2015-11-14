@@ -31,6 +31,8 @@ subtest 'dry run' => sub {
 subtest 'color' => sub {
   plan tests => 2;
 
+  local $App::clad::_stdout_is_terminal = sub { 1 };
+
   is(App::clad->new('-a', 'cluster1', 'echo')->color, 0, '-a on');
   is(App::clad->new('cluster1', 'echo')->color,       1, '-a off');
 
