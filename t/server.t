@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.010;
 use Test::Clustericious::Config;
-use Test::More tests => 11;
+use Test::More tests => 14;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
 use Path::Class qw( file );
@@ -199,4 +199,47 @@ subtest 'bad env' => sub {
   is $exit, 2, 'returns 2';
   like $err, qr{Clad Server: env is not hash}, 'diagnostic';
 
+};
+
+subtest 'client must send version' => sub {
+  plan tests => 2;
+
+  generate_stdin {
+    command => ['foo'],
+  };
+
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  is $exit, 2, 'returns 2';
+  like $err, qr{Clad Server: no client version}, 'diagnostic';
+};
+
+subtest 'server must check version (pass)' => sub {
+  plan tests => 1;
+  
+  local $App::clad::VERSION = 1.00;
+  
+  generate_stdin {
+    command => [$^X, -E => ''],
+    version => 'dev',
+    require => "0.22",
+  };
+
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  is $exit, 0, 'returns 0';
+};
+
+subtest 'server must check version (fail)' => sub {
+  plan tests => 2;
+
+  local $App::clad::VERSION = "1.00";
+  
+  generate_stdin {
+    command => [$^X, -E => ''],
+    version => 'dev',
+    require => "2.00",
+  };
+
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  is $exit, 2, 'returns 2';
+  like $err, qr{Clad Server: client requested version 2.00 but this is only 1.00}, 'diagnostic';
 };

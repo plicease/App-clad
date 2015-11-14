@@ -229,6 +229,26 @@ sub run_server
 {
   my($self) = @_;
   
+  # Payload:
+  #
+  #   command: required, must be a array with at least one element
+  #     the command to execute
+  #
+  #   env: optional, must be a hash reference
+  #     any environmental overrides
+  #
+  #   verbose: optional true/false
+  #     print out extra diagnostics
+  #
+  #   version: required number or 'dev'
+  #     the client version
+  #
+  #   require: optional, number or 'dev'
+  #     specifies the minimum required server
+  #     server should die if requirement isn't met
+  #     ignored if set to 'dev'
+  #
+  
   my $raw = do { local $/; <STDIN> };
   my $input = eval { Load($raw) };
   
@@ -259,6 +279,15 @@ sub run_server
   {
     say STDERR "Clad Server: no client version";
     return 2;
+  }
+  
+  if($input->{require} && defined $App::clad::VERSION)
+  {
+    if($input->{require} ne 'dev' && $input->{require} > $App::clad::VERSION)
+    {
+      say STDERR "Clad Server: client requested version @{[ $input->{require} ]} but this is only $App::clad::VERSION";
+      return 2;
+    }
   }
   
   $ENV{$_} = $input->{env}->{$_} for keys %{ $input->{env} };
