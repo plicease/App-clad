@@ -16,7 +16,7 @@ create_config_ok Clad1 => {
 subtest default => sub {
   plan tests => 1;
   my $clad = App::clad->new('--config' => 'Clad1', 'cluster1' => 'uptime');
-  my %alias = $clad->aliases;
+  my %alias = $clad->alias;
   is_deeply \%alias, {}, 'no aliases';
 };
 
@@ -35,7 +35,7 @@ create_config_ok Clad => {
 subtest 'with alias' => sub {
   plan tests => 1;
   my $clad = App::clad->new('cluster1' => 'uptime');
-  my %alias = $clad->aliases;
+  my %alias = $clad->alias;
   is_deeply \%alias, { foo => 'my foo alias', bar => [ qw( my bar alias ) ] }, 'no aliases';
 };
 

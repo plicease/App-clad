@@ -82,7 +82,7 @@ sub new
   $self->{clusters} = [ split ',', shift @ARGV ];
   $self->{command}  = [ @ARGV ];
 
-  if(my $expanded = $self->aliases->{$self->command->[0]})
+  if(my $expanded = $self->alias->{$self->command->[0]})
   {
     if(ref $expanded)
     {
@@ -121,7 +121,7 @@ sub user           { shift->{user}        }
 sub server         { shift->{server}      }
 sub verbose        { shift->{verbose}     }
 sub serial         { shift->{serial}      }
-sub aliases        { shift->config->aliases( default => {} ) }
+sub alias          { shift->config->aliases( default => {} ) }
 sub server_command { shift->config->server_command( default => 'clad --server' ) }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
