@@ -8,7 +8,7 @@ use Capture::Tiny qw( capture );
 
 create_config_ok Clad1 => {
   env => {},
-  clusters => {
+  cluster => {
     cluster1 => [ qw( host1 host2 host3 ) ],
     cluster2 => [ qw( host4 host5 host6 ) ],
   },
@@ -23,7 +23,7 @@ subtest default => sub {
 
 create_config_ok Clad => {
   env => {},
-  clusters => {
+  cluster => {
     cluster1 => [ qw( host1 host2 host3 ) ],
     cluster2 => [ qw( host4 host5 host6 ) ],
   },
@@ -60,7 +60,7 @@ subtest 'with alias used list ref' => sub {
 
 create_config_ok Clad2 => {
   env => {},
-  clusters => {
+  cluster => {
     cluster1 => [ qw( host1 host2 host3 ) ],
     cluster2 => [ qw( host4 host5 host6 ) ],
   },

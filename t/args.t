@@ -12,7 +12,7 @@ create_config_ok 'Clad', {
   env => {
     FOO => "BAR",
   },
-  clusters => {
+  cluster => {
     cluster1 => [ qw( host1 host2 host3 ) ],
     cluster2 => [ qw( host4 host5 host6 ) ],
   },

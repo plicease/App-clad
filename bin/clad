@@ -74,19 +74,23 @@ It contains these sections and configuration items:
 
 Environment hash to override environment variables on all hosts that run the command.
 
-=head2 clusters
+=head2 cluster
 
 Hash to define the clusters.  This is a hash of lists, where the keys are the cluster names
 and the lists are the host names.  For example:
 
  ---
- clusters:
+ cluster:
    mycluster:
      - host1
      - host2
    myothercluster:
      - host3
      - host4
+
+
+The old key (now deprecated) C<clusters> is also recognized, if C<cluster> is not
+specified.  This deprecated key will be removed on or after January 31 2016.
 
 =head2 alias
 
@@ -131,7 +135,7 @@ Here is an example configuration
    PATH: /home/starscream/perl5/bin:/usr/local/bin:/usr/bin:/bin
    PERL5LIB: /home/starscream/perl5/lib
  
- clusters:
+ cluster:
    mailservers:
      - mail1
      - mail2

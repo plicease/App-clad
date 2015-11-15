@@ -1,6 +1,9 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Deprecate "clusters" in the configuration file
+    in favor of "cluster".  "clusters" will be removed
+    on or after January 13, 2016.
 
 0.99_02   2015-11-14 01:38:10 -0500
   - Added ssh_extra configuration useful for

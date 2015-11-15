@@ -98,10 +98,10 @@ sub new
   
   my $ok = 1;
   
-  foreach my $cluster (map { "$_" } @{ $self->{clusters} })
+  foreach my $cluster (map { "$_" } $self->clusters)
   {
     $cluster =~ s/^.*@//;
-    unless($self->config->clusters->{$cluster})
+    unless($self->cluster_list->{$cluster})
     {
       say STDERR "unknown cluster: $cluster";
       $ok = 0;
@@ -113,15 +113,15 @@ sub new
   $self;
 }
 
-sub config         { shift->{config}      }
-sub dry_run        { shift->{dry_run}     }
-sub color          { shift->{color}       }
-sub clusters       { shift->{clusters}    }
-sub command        { shift->{command}     }
-sub user           { shift->{user}        }
-sub server         { shift->{server}      }
-sub verbose        { shift->{verbose}     }
-sub serial         { shift->{serial}      }
+sub config         { shift->{config}        }
+sub dry_run        { shift->{dry_run}       }
+sub color          { shift->{color}         }
+sub clusters       { @{ shift->{clusters} } }
+sub command        { shift->{command}       }
+sub user           { shift->{user}          }
+sub server         { shift->{server}        }
+sub verbose        { shift->{verbose}       }
+sub serial         { shift->{serial}        }
 sub server_command { shift->config->server_command( default => 'clad --server' ) }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
@@ -136,6 +136,17 @@ sub alias
   $self->config->alias( default => sub {
     my %deprecated = $self->config->aliases( default => {} );
     say STDERR "use of aliases key in configuration is deprecated, use alias instead"
+        if %deprecated;
+    \%deprecated;
+  });
+}
+
+sub cluster_list
+{
+  my($self) = @_;
+  $self->config->cluster( default => sub {
+    my %deprecated = $self->config->clusters( default => {} );
+    say STDERR "use of clusters key in configuration is deprecated, use cluster instead"
         if %deprecated;
     \%deprecated;
   });
@@ -156,10 +167,10 @@ sub host_length
   {
     my $length = 0;
   
-    foreach my $cluster (map { "$_" } @{ $self->{clusters} })
+    foreach my $cluster (map { "$_" } $self->clusters)
     {
       my $user = $cluster =~ s/^(.*)@// ? $1 : $self->user;
-      foreach my $host (@{ $self->config->clusters->{$cluster} })
+      foreach my $host (@{ $self->cluster_list->{$cluster} })
       {
         my $prefix = ($user ? "$user\@" : '') . $host;
         $length = length $prefix if length $prefix > $length;
@@ -188,7 +199,7 @@ sub run
   my $ret = 0;
   my @done;
   
-  foreach my $cluster (map { "$_" } @{ $self->{clusters} })
+  foreach my $cluster (map { "$_" } $self->clusters)
   {
     my $user = $cluster =~ s/^(.*)@// ? $1 : $self->user;
 
@@ -196,7 +207,7 @@ sub run
     $env{CLUSTER}      //= $cluster; # deprecate
     $env{CLAD_CLUSTER} //= $cluster;
 
-    foreach my $host (@{ $self->config->clusters->{$cluster} })
+    foreach my $host (@{ $self->cluster_list->{$cluster} })
     {
       my $prefix = ($user ? "$user\@" : '') . $host;
       if($self->dry_run)
