@@ -6,7 +6,6 @@ use 5.010;
 use Getopt::Long 1.24 qw( GetOptionsFromArray :config pass_through);
 use Pod::Usage qw( pod2usage );
 use Clustericious::Config 1.03;
-use YAML::XS qw( Dump Load );
 use Term::ANSIColor ();
 use Sys::Hostname qw( hostname );
 
@@ -54,6 +53,7 @@ sub new
     serial     => 0,
     next_color => -1,
     ret        => 0,
+    fat        => 0,
   }, $class;
   
   my @argv = @_;
@@ -69,6 +69,7 @@ sub new
     'verbose'  => \$self->{verbose},
     'serial'   => \$self->{serial},
     'config=s' => \$config_name,
+    'fat'      => \$self->{fat},
     'help|h'   => sub { pod2usage({ -verbose => 2}) },
     'version'  => sub {
       say STDERR 'App::clad version ', ($App::clad::VERSION // 'dev');
@@ -136,13 +137,22 @@ sub user           { shift->{user}          }
 sub server         { shift->{server}        }
 sub verbose        { shift->{verbose}       }
 sub serial         { shift->{serial}        }
-sub server_command { shift->config->server_command( default => 'clad --server' ) }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
                                                                  -o => 'BatchMode=yes',
                                                                  -o => 'PasswordAuthentication=no',
                                                                  '-T', ] ) }
 sub ssh_extra      { shift->config->ssh_extra(      default => [] ) }
+sub fat            { my $self = shift; $self->{fat} || $self->config->fat( default => 0 ) }
+
+sub server_command
+{
+  my($self) = @_;
+  
+  $self->fat
+  ? $self->config->fat_server_command( default => 'perl' )
+  : $self->config->server_command(     default => 'clad --server' );
+}
 
 sub alias
 {
@@ -217,7 +227,7 @@ sub run
   {
     my $user = $cluster =~ s/^(.*)@// ? $1 : $self->user;
 
-    my %env = $self->config->env;
+    my %env = $self->config->env( default => {} );
     $env{CLUSTER}      //= $cluster; # deprecate
     $env{CLAD_CLUSTER} //= $cluster;
 
@@ -252,85 +262,8 @@ sub run
 
 sub run_server
 {
-  my($self) = @_;
-  
-  # Payload:
-  #
-  #   command: required, must be a array with at least one element
-  #     the command to execute
-  #
-  #   env: optional, must be a hash reference
-  #     any environmental overrides
-  #
-  #   verbose: optional true/false
-  #     print out extra diagnostics
-  #
-  #   version: required number or 'dev'
-  #     the client version
-  #
-  #   require: optional, number or 'dev'
-  #     specifies the minimum required server
-  #     server should die if requirement isn't met
-  #     ignored if set to 'dev'
-  #
-  
-  my $raw = do { local $/; <STDIN> };
-  my $input = eval { Load($raw) };
-  
-  if(my $yaml_error = $@)
-  {
-    say STDERR "Clad Server: side YAML Error:";
-    say STDERR $yaml_error;
-    say STDERR "payload:";
-    say STDERR $raw;
-    return 2;
-  }
-  
-  print STDERR Dump($input) if $input->{verbose};
-
-  if(ref $input->{command} ne 'ARRAY' || @{ $input->{command} } == 0)
-  {
-    say STDERR "Clad Server: Unable to find command";
-    return 2;
-  }
-  
-  if(defined $input->{env} && ref $input->{env} ne 'HASH')
-  {
-    say STDERR "Clad Server: env is not hash";
-    return 2;
-  }
-  
-  unless($input->{version})
-  {
-    say STDERR "Clad Server: no client version";
-    return 2;
-  }
-  
-  if($input->{require} && defined $App::clad::VERSION)
-  {
-    if($input->{require} ne 'dev' && $input->{require} > $App::clad::VERSION)
-    {
-      say STDERR "Clad Server: client requested version @{[ $input->{require} ]} but this is only $App::clad::VERSION";
-      return 2;
-    }
-  }
-  
-  $ENV{$_} = $input->{env}->{$_} for keys %{ $input->{env} };
-  
-  system @{ $input->{command} };
-  
-  if($? == -1)
-  {
-    say STDERR "Clad Server: failed to execute on @{[ hostname ]}";
-    return 2;
-  }
-  elsif($? & 127)
-  {
-    say STDERR "Clad Server: died with signal @{[ $? & 127 ]} on @{[ hostname ]}";
-    return 2;
-  }
-  
-  return $? >> 8;
+  require Clustericious::Admin::Server;
+  Clustericious::Admin::Server->_server(*STDIN);
 }
 
 package Clustericious::Admin::RemoteHandler;
@@ -340,6 +273,7 @@ use warnings;
 use AE;
 use AnyEvent::Open3::Simple 0.76;
 use YAML::XS qw( Dump );
+use JSON::MaybeXS qw( encode_json );
 
 # VERSION
 
@@ -387,12 +321,31 @@ sub new
     },
   );
   
-  my $payload = Dump({
+  my $payload = {
     env     => $args{env},
     command => $clad->command,
     verbose => $clad->verbose,
     version => $App::clad::VERSION // 'dev',
-  });
+  };
+  
+  if($self->clad->fat)
+  {
+    # Perl on the remote end may not have YAML
+    # (actually it may not have JSON::PP either
+    # but at least that is part of the core as
+    # of 5.14).
+    $payload = encode_json($payload);
+    require Clustericious::Admin::Server;
+    open my $fh, '<', $INC{'Clustericious/Admin/Server.pm'};
+    my $code = do { local $/; <$fh> };
+    close $fh;
+    $code =~ s{\s*$}{"\n"}e;
+    $payload = $code . $payload;
+  }
+  else
+  {
+    $payload = Dump($payload);
+  }
   
   $ipc->run(
     $clad->ssh_command,

@@ -6,6 +6,8 @@ EV
 ExtUtils::MakeMaker
 File::HomeDir
 Getopt::Long
+JSON::MaybeXS
+JSON::PP
 Path::Class
 Test::Exit
 Test::More

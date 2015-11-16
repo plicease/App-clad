@@ -156,7 +156,7 @@ subtest 'bad yaml' => sub {
   my($out, $err, $exit) = capture { App::clad->new('--server')->run };
   is $exit, 2, 'returns 2';
 
-  like $err, qr{Clad Server: side YAML Error:}, 'summary';  
+  like $err, qr{Clad Server: side YAML/JSON Error:}, 'summary';
   like $err, qr{payload:}, 'payload header';
 
 };

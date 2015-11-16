@@ -41,6 +41,13 @@ which may also contain command aliases and environment settings.
     Specify the name of an alternate configuration.  For example if you use `--config MyClad` then
     the configuration file `~/etc/MyClad.conf` will be used instead of `~/etc/Clad.conf`.
 
+- --fat
+
+    Send the server code with the payload and feed into Perl on the remote end.  This makes
+    the total payload much larger, but it allows you to use clad with servers that do not
+    have [App::clad](https://metacpan.org/pod/App::clad) installed.  The remote end must have Perl 5.10 or better in the `PATH`
+    and requires [JSON::PP](https://metacpan.org/pod/JSON::PP) (included as part of the Core as of Perl 5.14).
+
 - --help
 
     Print help and exit.
@@ -90,6 +97,17 @@ specified.  This deprecated key will be removed on or after January 31 2016.
 [clad](https://metacpan.org/pod/clad) runs on both the client and the server.  This specifies the command used to
 communicate with the client on the server end.  Unless you are testing [clad](https://metacpan.org/pod/clad) you
 probably won't need to change this.
+
+## fat
+
+Include the server code as part of the payload.  This is useful for hosts that
+do not already have [App::clad](https://metacpan.org/pod/App::clad) installed.  This is the same as the `--fat`
+option above.
+
+## fat\_server\_command
+
+The command to execute on the server side when using the `--fat` command line
+option or the `fat` configuration option.  The default is simply `perl`.
 
 ## ssh\_command
 
