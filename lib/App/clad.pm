@@ -91,10 +91,10 @@ sub new
 
   # make sure there is at least one command argument is specified
   # and that it doesn't look like a command line option
-  pod2usage({ -exitvalue => 1, -message => "Unknown option: $1" })
-    if $argv[0] =~ /^--?(.*)$/;
   pod2usage({ -exitval => 1, -message => "No commands specified" })
     unless @argv;
+  pod2usage({ -exitvalue => 1, -message => "Unknown option: $1" })
+    if $argv[0] =~ /^--?(.*)$/;
   
   $self->{command}  = [ @argv ];
 
