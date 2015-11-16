@@ -1,9 +1,17 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.99_03   2015-11-16 04:27:10 -0500
   - Deprecate "clusters" in the configuration file
     in favor of "cluster".  "clusters" will be removed
     on or after January 31, 2016.
+  - Restored the now deprecated (instead of removed)
+    Clustericious::Admin interface.  Along with the
+    other deprecations I plan on removing it on or
+    after January 13, 2016.
+  - MSWin32 is officially not supported.  It may be in
+    a future revision.
 
 0.99_02   2015-11-14 01:38:10 -0500
   - Added ssh_extra configuration useful for
