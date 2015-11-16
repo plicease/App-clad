@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Consider this to be a release candidate for 1.00
   - Stop argument parsing at first non-option,
     non recognized option, so arguments can be passed
     to remote end without -- (this fixes an issue
@@ -62,12 +63,12 @@ Revision history for {{$dist->name}}
   - better documentation coverage
   - do not use ansi color if standard out is not a terminal
 
-0.23 Mon Aug 19 07:36:09 EDT 2013
+0.23      2013-08-19 07:36:09 America/New_York
   - increment version number this time
 
-0.22 Mon Aug 19 07:34:14 EDT 2013
+0.22      2013-08-19 07:34:14 America/New_York
   - minor documentation tweaks
 
-0.21 Mon Nov  5 12:29:52 EST 2012
+0.21      2012-11-05 12:29:52 America/New_York
   - first public release
 
