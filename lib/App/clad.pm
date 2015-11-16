@@ -413,7 +413,6 @@ sub print_line
   my($self, $code, $line) = @_;
   
   print Term::ANSIColor::color($self->color) if $self->is_color;
-  $DB::single = 1;
   printf "[%@{[ $self->clad->host_length ]}s %-4s] ", $self->prefix, $code;
   print Term::ANSIColor::color('reset') if $self->is_color;
   print $line, "\n";

@@ -8,4 +8,5 @@ File::HomeDir
 Path::Class
 Test::Exit
 Test::More
+Test::Warn
 YAML::XS

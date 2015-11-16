@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 5;
+use Test::More tests => 6;
 use App::clad;
 use File::HomeDir;
 use Path::Class qw( file );
@@ -46,6 +46,28 @@ subtest basic => sub {
     ok $out{"[host$_ out ] host=host$_"},      "host $_ host $_";
   }
   
+};
+
+subtest 'basic with deprecated api' => sub {
+  plan tests => 8;
+  
+  require_ok 'Clustericious::Admin';
+
+  my($out, $err, $exit) = capture {
+    Clustericious::Admin->run(
+      {}, 'cluster1',
+      $^X, -E => 'say "host=$ENV{CLAD_HOST}"; say "cluster=$ENV{CLAD_CLUSTER}"',
+    );
+  };
+  
+  is $exit, 0, 'exit = 0';
+  my %out = map { $_ => 1 }split /\n/, $out;
+  
+  for(1..3)
+  {
+    ok $out{"[host$_ out ] cluster=cluster1"}, "host $_ cluster 1";
+    ok $out{"[host$_ out ] host=host$_"},      "host $_ host $_";
+  }
 };
 
 subtest 'with specified user' => sub {
