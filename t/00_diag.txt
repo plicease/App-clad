@@ -5,6 +5,7 @@ Clustericious::Config
 EV
 ExtUtils::MakeMaker
 File::HomeDir
+Getopt::Long
 Path::Class
 Test::Exit
 Test::More
