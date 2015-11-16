@@ -48,8 +48,8 @@ interface.
 
 sub _decode
 {
-  my($fh) = @_;
-  my $raw = do { local $/; <STDIN> };
+  my(undef, $fh) = @_;
+  my $raw = do { local $/; <$fh> };
 
   my $payload;
 
@@ -158,7 +158,7 @@ sub _server
   return $? >> 8;
 }
 
-_server(*DATA) unless caller;
+__PACKAGE__->_server(*DATA) unless caller;
 
 1;
 
