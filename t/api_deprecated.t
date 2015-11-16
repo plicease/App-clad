@@ -67,7 +67,7 @@ subtest 'Clustericious::Admin->run' => sub {
       Clustericious::Admin->run({}, 'cluster1', 'command');
     } 'Class method call of Clustericious::Admin->run is deprecated',
     'deprecation warning';
-    is_deeply \@new_args, [qw( cluster1 -- command ) ], 'args match';
+    is_deeply \@new_args, [qw( cluster1 command ) ], 'args match';
   };
 
   subtest '-n' => sub {
@@ -76,7 +76,7 @@ subtest 'Clustericious::Admin->run' => sub {
       Clustericious::Admin->run({ n => 1 }, 'cluster1', 'command');
     } 'Class method call of Clustericious::Admin->run is deprecated',
     'deprecation warning';
-    is_deeply \@new_args, [qw( -n cluster1 -- command ) ], 'args match';
+    is_deeply \@new_args, [qw( -n cluster1 command ) ], 'args match';
   };
 
   subtest '-a' => sub {
@@ -85,7 +85,7 @@ subtest 'Clustericious::Admin->run' => sub {
       Clustericious::Admin->run({ a => 1 }, 'cluster1', 'command');
     } 'Class method call of Clustericious::Admin->run is deprecated',
     'deprecation warning';
-    is_deeply \@new_args, [qw( -a cluster1 -- command ) ], 'args match';
+    is_deeply \@new_args, [qw( -a cluster1 command ) ], 'args match';
   };
 
   subtest '-l' => sub {
@@ -94,6 +94,6 @@ subtest 'Clustericious::Admin->run' => sub {
       Clustericious::Admin->run({ l => 'foo' }, 'cluster1', 'command');
     } 'Class method call of Clustericious::Admin->run is deprecated',
     'deprecation warning';
-    is_deeply \@new_args, [qw( -l foo cluster1 -- command ) ], 'args match';
+    is_deeply \@new_args, [qw( -l foo cluster1 command ) ], 'args match';
   };
 };

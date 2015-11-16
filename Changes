@@ -1,6 +1,11 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Stop argument parsing at first non-option,
+    non recognized option, so arguments can be passed
+    to remote end without -- (this fixes an issue
+    mostly relevent since 0.99_01, which was a trial
+    release anyway).
 
 0.99_03   2015-11-16 04:27:10 -0500
   - Deprecate "clusters" in the configuration file

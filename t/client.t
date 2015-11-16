@@ -32,7 +32,6 @@ subtest basic => sub {
   my($out, $err, $exit) = capture {
     App::clad->new(
       'cluster1', 
-      '--', 
       $^X, -E => 'say "host=$ENV{CLAD_HOST}"; say "cluster=$ENV{CLAD_CLUSTER}"',
     )->run;
   };
@@ -77,7 +76,6 @@ subtest 'with specified user' => sub {
     App::clad->new(
       -l => 'foo',
       'cluster1', 
-      '--',
       $^X, -E => 'say "user=$ENV{USER}"',
     )->run;
   };
@@ -98,7 +96,6 @@ subtest 'with two users' => sub {
   my($out, $err, $exit) = capture {
     App::clad->new(
       'foo@cluster1,bar@cluster2', 
-      '--',
       $^X, -E => 'say "user=$ENV{USER}"',
     )->run;
   };
@@ -121,7 +118,6 @@ subtest 'failure' => sub {
   my($out, $err, $exit) = capture {
     App::clad->new(
       'cluster1',
-      '--',
       $^X, -E => 'exit 22',
     )->run;
   };

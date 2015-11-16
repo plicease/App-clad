@@ -6,7 +6,7 @@ BEGIN { plan skip_all => 'test requires Test::Exit' unless eval qq{ use Test::Ex
 use App::clad;
 use Capture::Tiny qw( capture );
 
-plan tests => 12;
+plan tests => 14;
 
 create_config_ok 'Clad', {
   env => {
@@ -113,4 +113,18 @@ subtest 'serial' => sub {
   is(App::clad->new('--serial', 'cluster1', 'echo')->serial, 1, '--serial on');
   is(App::clad->new('cluster1', 'echo')->serial,       0, '--serial off');
 
+};
+
+subtest 'illegal options as cluster' => sub {
+  plan tests => 2;
+  my($out, $err, $exit) = capture { exit_code { App::clad->new("--foo", "bar") } };
+  is $exit, 1, 'exit = 1';
+  like $out, qr{Unknown option: foo}, "diagnostic";
+};
+
+subtest 'illegal options as command' => sub {
+  plan tests => 2;
+  my($out, $err, $exit) = capture { exit_code { App::clad->new("cluster1", "--bar") } };
+  is $exit, 1, 'exit = 1';
+  like $out, qr{Unknown option: bar}, "diagnostic";
 };

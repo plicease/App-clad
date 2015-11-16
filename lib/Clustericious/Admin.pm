@@ -125,7 +125,7 @@ sub run
       ($opts->{n} ? ('-n') : ()),
       ($opts->{l} ? ('-l' => $opts->{l}) : ()),
       ($opts->{a} ? ('-a') : ()),
-      $cluster, '--', @cmd,
+      $cluster, @cmd,
     )->run;
   };
 }

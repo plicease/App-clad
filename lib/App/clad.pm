@@ -3,7 +3,7 @@ package App::clad;
 use strict;
 use warnings;
 use 5.010;
-use Getopt::Long qw( GetOptions );
+use Getopt::Long 1.24 qw( GetOptionsFromArray :config pass_through);
 use Pod::Usage qw( pod2usage );
 use Clustericious::Config 1.03;
 use YAML::XS qw( Dump Load );
@@ -56,11 +56,12 @@ sub new
     ret        => 0,
   }, $class;
   
-  local @ARGV = @_;
+  my @argv = @_;
   
   my $config_name = 'Clad';
   
-  GetOptions(
+  GetOptionsFromArray(
+    \@argv,
     'n'        => \$self->{dry_run},
     'a'        => sub { $self->{color} = 0 },
     'l=s'      => \$self->{user},
@@ -79,10 +80,23 @@ sub new
   
   return $self if $self->server;
   
-  pod2usage(1) unless @ARGV >= 2;
+  # make sure there is at least one cluster specified
+  # and that it doesn't look like a command line option
+  pod2usage({ -exitval => 1, -message => "No clusters specified" })
+    unless @argv;  
+  pod2usage({ -exitvalue => 1, -message => "Unknown option: $1" })
+    if $argv[0] =~ /^--?(.*)$/;
+
+  $self->{clusters} = [ split ',', shift @argv ];
+
+  # make sure there is at least one command argument is specified
+  # and that it doesn't look like a command line option
+  pod2usage({ -exitvalue => 1, -message => "Unknown option: $1" })
+    if $argv[0] =~ /^--?(.*)$/;
+  pod2usage({ -exitval => 1, -message => "No commands specified" })
+    unless @argv;
   
-  $self->{clusters} = [ split ',', shift @ARGV ];
-  $self->{command}  = [ @ARGV ];
+  $self->{command}  = [ @argv ];
 
   if(my $expanded = $self->alias->{$self->command->[0]})
   {
