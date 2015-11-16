@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.99_04   2015-11-16 06:57:26 -0500
   - Consider this to be a release candidate for 1.00
   - Stop argument parsing at first non-option,
     non recognized option, so arguments can be passed
