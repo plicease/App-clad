@@ -296,8 +296,10 @@ configuration file on each node that the command is run.  The deprecated
 
 [Clustericious::Admin](https://metacpan.org/pod/Clustericious::Admin) and [clad](https://metacpan.org/pod/clad) require an [AnyEvent](https://metacpan.org/pod/AnyEvent) event loop that allows
 entering the event loop by calling `recv` on a condition variable.  This is not
-supported by all [AnyEvent](https://metacpan.org/pod/AnyEvent) event loops and is discouraged by its documentation
-for CPAN modules.
+supported by all [AnyEvent](https://metacpan.org/pod/AnyEvent) event loops and is discouraged by the [AnyEvent](https://metacpan.org/pod/AnyEvent)
+documentation for CPAN modules, though most of the important event loops, such as
+[EV](https://metacpan.org/pod/EV) and the pure perl implementation that comes with [AnyEvent](https://metacpan.org/pod/AnyEvent) DO support
+this behavior.
 
 # AUTHOR
 

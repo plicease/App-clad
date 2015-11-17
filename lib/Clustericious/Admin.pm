@@ -136,8 +136,10 @@ sub run
 
 L<Clustericious::Admin> and L<clad> require an L<AnyEvent> event loop that allows
 entering the event loop by calling C<recv> on a condition variable.  This is not
-supported by all L<AnyEvent> event loops and is discouraged by its documentation
-for CPAN modules.
+supported by all L<AnyEvent> event loops and is discouraged by the L<AnyEvent>
+documentation for CPAN modules, though most of the important event loops, such as
+L<EV> and the pure perl implementation that comes with L<AnyEvent> DO support
+this behavior.
 
 =head1 SEE ALSO
 
