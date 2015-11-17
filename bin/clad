@@ -308,4 +308,11 @@ This environment variable is set to the cluster name from the
 configuration file on each node that the command is run.  The deprecated
 C<CLUSTER> is also set, though that may be removed in a future version.
 
+=head1 CAVEATS
+
+L<Clustericious::Admin> and L<clad> require an L<AnyEvent> event loop that allows
+entering the event loop by calling C<recv> on a condition variable.  This is not
+supported by all L<AnyEvent> event loops and is discouraged by its documentation
+for CPAN modules.
+
 =cut

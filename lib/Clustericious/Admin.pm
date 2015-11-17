@@ -132,6 +132,13 @@ sub run
 
 1;
 
+=head1 CAVEATS
+
+L<Clustericious::Admin> and L<clad> require an L<AnyEvent> event loop that allows
+entering the event loop by calling C<recv> on a condition variable.  This is not
+supported by all L<AnyEvent> event loops and is discouraged by its documentation
+for CPAN modules.
+
 =head1 SEE ALSO
 
 =over 4

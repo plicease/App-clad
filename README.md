@@ -292,6 +292,13 @@ This environment variable is set to the cluster name from the
 configuration file on each node that the command is run.  The deprecated
 `CLUSTER` is also set, though that may be removed in a future version.
 
+# CAVEATS
+
+[Clustericious::Admin](https://metacpan.org/pod/Clustericious::Admin) and [clad](https://metacpan.org/pod/clad) require an [AnyEvent](https://metacpan.org/pod/AnyEvent) event loop that allows
+entering the event loop by calling `recv` on a condition variable.  This is not
+supported by all [AnyEvent](https://metacpan.org/pod/AnyEvent) event loops and is discouraged by its documentation
+for CPAN modules.
+
 # AUTHOR
 
 Graham Ollis &lt;plicease@cpan.org>
