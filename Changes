@@ -25,7 +25,7 @@ Revision history for {{$dist->name}}
   - Restored the now deprecated (instead of removed)
     Clustericious::Admin interface.  Along with the
     other deprecations I plan on removing it on or
-    after January 13, 2016.
+    after January 31, 2016.
   - MSWin32 is officially not supported.  It may be in
     a future revision.
 

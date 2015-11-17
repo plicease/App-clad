@@ -18,7 +18,7 @@ This module used to contain the machinery to implement the L<clad> command.
 This was moved into L<App::clad> when it was rewritten.  This module is
 provided for compatibility.  In the future it may provide a Perl level API
 for L<clad>.  It currently provides a deprecated interface which will be
-removed from a future version, but not before B<January 13, 2015>.
+removed from a future version, but not before B<January 31, 2015>.
 
 =head1 FUNCTIONS
 
