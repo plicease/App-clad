@@ -45,8 +45,12 @@ which may also contain command aliases and environment settings.
 
     Send the server code with the payload and feed into Perl on the remote end.  This makes
     the total payload much larger, but it allows you to use clad with servers that do not
-    have [App::clad](https://metacpan.org/pod/App::clad) installed.  The remote end must have Perl 5.10 or better in the `PATH`
+    have [App::clad](https://metacpan.org/pod/App::clad) installed.  The remote end must have Perl 5.8.1 or better in the `PATH`
     and requires [JSON::PP](https://metacpan.org/pod/JSON::PP) (included as part of the Core as of Perl 5.14).
+
+- --max number
+
+    Limit the maximum number of simultaneous connections to `number`
 
 - --help
 

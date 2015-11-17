@@ -2,7 +2,6 @@ package Clustericious::Admin::Server;
 
 use strict;
 use warnings;
-use 5.010;
 use Sys::Hostname qw( hostname );
 
 # ABSTRACT: Parallel SSH client server side code
@@ -61,10 +60,10 @@ sub _decode
     };
     if(my $yaml_error = $@)
     {
-      say STDERR "Clad Server: side YAML Error:";
-      say STDERR $yaml_error;
-      say STDERR "payload:";
-      say STDERR $raw;
+      print STDERR "Clad Server: side YAML Error:\n";
+      print STDERR $yaml_error, "\n";
+      print STDERR "payload:\n";
+      print STDERR $raw, "\n";
       return;
     }
     print STDERR YAML::XS::Dump($payload) if $payload->{verbose};
@@ -77,10 +76,10 @@ sub _decode
     };
     if(my $json_error = $@)
     {
-      say STDERR "Clad Server: side YAML/JSON Error:";
-      say STDERR $json_error;
-      say STDERR "payload:";
-      say STDERR $raw;
+      print STDERR "Clad Server: side YAML/JSON Error:\n";
+      print STDERR $json_error, "\n";
+      print STDERR "payload:\n";
+      print STDERR $raw, "\n";
       return;
     }
     print JSON::PP::encode_json($payload) if $payload->{verbose};
@@ -115,19 +114,19 @@ sub _server
 
   if(ref $payload->{command} ne 'ARRAY' || @{ $payload->{command} } == 0)
   {
-    say STDERR "Clad Server: Unable to find command";
+    print STDERR "Clad Server: Unable to find command\n";
     return 2;
   }
   
   if(defined $payload->{env} && ref $payload->{env} ne 'HASH')
   {
-    say STDERR "Clad Server: env is not hash";
+    print STDERR "Clad Server: env is not hash\n";
     return 2;
   }
   
   unless($payload->{version})
   {
-    say STDERR "Clad Server: no client version";
+    print STDERR "Clad Server: no client version\n";
     return 2;
   }
   
@@ -135,7 +134,7 @@ sub _server
   {
     if($payload->{require} ne 'dev' && $payload->{require} > $App::clad::VERSION)
     {
-      say STDERR "Clad Server: client requested version @{[ $payload->{require} ]} but this is only $App::clad::VERSION";
+      print STDERR "Clad Server: client requested version @{[ $payload->{require} ]} but this is only $App::clad::VERSION\n";
       return 2;
     }
   }
@@ -146,12 +145,12 @@ sub _server
   
   if($? == -1)
   {
-    say STDERR "Clad Server: failed to execute on @{[ hostname ]}";
+    print STDERR "Clad Server: failed to execute on @{[ hostname ]}\n";
     return 2;
   }
   elsif($? & 127)
   {
-    say STDERR "Clad Server: died with signal @{[ $? & 127 ]} on @{[ hostname ]}";
+    print STDERR "Clad Server: died with signal @{[ $? & 127 ]} on @{[ hostname ]}\n";
     return 2;
   }
   

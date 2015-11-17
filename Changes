@@ -4,6 +4,8 @@ Revision history for {{$dist->name}}
   - Second release candidate for 1.00
   - Added --fat option (and fat config option) for
     hosts that don't already have App-clad installed
+  - Relaxed requirement for server code (using --fat)
+    to Perl 5.8 and JSON::PP.
   - Added --max option.
 
 0.99_04   2015-11-16 06:57:26 -0500

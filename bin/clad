@@ -58,7 +58,7 @@ the configuration file C<~/etc/MyClad.conf> will be used instead of C<~/etc/Clad
 
 Send the server code with the payload and feed into Perl on the remote end.  This makes
 the total payload much larger, but it allows you to use clad with servers that do not
-have L<App::clad> installed.  The remote end must have Perl 5.10 or better in the C<PATH>
+have L<App::clad> installed.  The remote end must have Perl 5.8.1 or better in the C<PATH>
 and requires L<JSON::PP> (included as part of the Core as of Perl 5.14).
 
 =item --max number
