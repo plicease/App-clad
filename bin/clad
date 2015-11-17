@@ -61,6 +61,10 @@ the total payload much larger, but it allows you to use clad with servers that d
 have L<App::clad> installed.  The remote end must have Perl 5.10 or better in the C<PATH>
 and requires L<JSON::PP> (included as part of the Core as of Perl 5.14).
 
+=item --max number
+
+Limit the maximum number of simultaneous connections to C<number>
+
 =item --help
 
 Print help and exit.

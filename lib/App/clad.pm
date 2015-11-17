@@ -8,6 +8,7 @@ use Pod::Usage qw( pod2usage );
 use Clustericious::Config 1.03;
 use Term::ANSIColor ();
 use Sys::Hostname qw( hostname );
+use AE;
 
 # ABSTRACT: Parallel SSH client
 # VERSION
@@ -54,6 +55,8 @@ sub new
     next_color => -1,
     ret        => 0,
     fat        => 0,
+    max        => 0,
+    count      => 0,
   }, $class;
   
   my @argv = @_;
@@ -70,6 +73,7 @@ sub new
     'serial'   => \$self->{serial},
     'config=s' => \$config_name,
     'fat'      => \$self->{fat},
+    'max=s'    => \$self->{max},
     'help|h'   => sub { pod2usage({ -verbose => 2}) },
     'version'  => sub {
       say STDERR 'App::clad version ', ($App::clad::VERSION // 'dev');
@@ -137,6 +141,7 @@ sub user           { shift->{user}          }
 sub server         { shift->{server}        }
 sub verbose        { shift->{verbose}       }
 sub serial         { shift->{serial}        }
+sub max            { shift->{max}           }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
                                                                  -o => 'BatchMode=yes',
@@ -222,6 +227,8 @@ sub run
   
   my $ret = 0;
   my @done;
+  my $max = $self->max;
+
   
   foreach my $cluster (map { "$_" } $self->clusters)
   {
@@ -249,6 +256,22 @@ sub run
         );
 
         my $done = $remote->cv;
+        
+        $done->cb(sub {
+          my $count = --$self->{count};
+          $self->{cv}->send if $self->{cv};
+        }) if $max;
+        
+        if($max)
+        {
+          my $count = ++$self->{count};
+          if($count >= $max)
+          {
+            $self->{cv} = AE::cv;
+            $self->{cv}->recv;
+            delete $self->{cv};
+          }
+        }
         
         $self->serial ? $done->recv : push @done, $done;
       }

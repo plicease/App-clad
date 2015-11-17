@@ -6,7 +6,7 @@ BEGIN { plan skip_all => 'test requires Test::Exit' unless eval qq{ use Test::Ex
 use App::clad;
 use Capture::Tiny qw( capture );
 
-plan tests => 14;
+plan tests => 15;
 
 create_config_ok 'Clad', {
   env => {
@@ -46,6 +46,15 @@ subtest 'user' => sub {
   is(App::clad->new('-l' => 'foo', 'cluster1', 'echo')->user, 'foo', '-l foo');
   is(App::clad->new('cluster1', 'echo')->user,                undef, 'no user');
   
+};
+
+subtest 'max' => sub {
+  plan tests => 2;
+  
+  # NOTE: the functionality is as of this writing not tested for this option
+  # because it is hard to test what amounts to a race condition
+  is(App::clad->new('--max' => '47', 'cluster1', 'echo')->max, '47', '--max 47');
+  is(App::clad->new('cluster1', 'echo')->max,                   0,   'max = 0');
 };
 
 subtest 'help' => sub {

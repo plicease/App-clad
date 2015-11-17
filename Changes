@@ -4,6 +4,7 @@ Revision history for {{$dist->name}}
   - Second release candidate for 1.00
   - Added --fat option (and fat config option) for
     hosts that don't already have App-clad installed
+  - Added --max option.
 
 0.99_04   2015-11-16 06:57:26 -0500
   - Consider this to be a release candidate for 1.00
