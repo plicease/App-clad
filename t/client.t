@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 7;
+use Test::More tests => 8;
 use App::clad;
 use File::HomeDir;
 use Path::Class qw( dir file );
@@ -26,6 +26,16 @@ create_config_ok Clad => {
     [ $^X, $dist_root->file('corpus', 'fake-ssh.pl')->stringify ],
   ssh_options =>
     [ -o => "Foo=yes", -o => "Bar=no" ],
+  script => {
+    myscript =>
+      qq{#!$^X
+        use strict;
+        use warnings;
+        use 5.010;
+        say STDOUT "+output";
+        say STDERR "+error";
+      },
+  },
 };
 
 subtest basic => sub {
@@ -163,5 +173,25 @@ subtest 'with files' => sub {
   is $exit, 0, 'exit = 0';
   is($dir->file('text1.txt')->slurp, 'text1', 'FILE1 content');
   is($dir->file('text2.txt')->slurp, 'text2', 'FILE2 content');  
+};
+
+subtest myscript => sub {
+  plan tests => 7;
+
+  my($out, $err, $exit) = capture {
+    App::clad->new(
+      'cluster1', 'myscript',
+    )->run;
+  };
+  
+  is $exit, 0, 'exit = 0';
+  my %out = map { $_ => 1 }split /\n/, $out;
+  
+  for(1..3)
+  {
+    ok $out{"[host$_ out ] +output"}, "host $_ output";
+    ok $out{"[host$_ err ] +error"},  "host $_ error";
+  }
+  
 };
 

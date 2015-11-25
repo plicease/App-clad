@@ -141,6 +141,23 @@ add a few options without replacing the existing set, this is the way to go.
 A list of colors as understood by [Term::ANSIColor](https://metacpan.org/pod/Term::ANSIColor) which are used in alteration
 for each host to help separate the output visually.
 
+## script
+
+A hash of inline scripts.  The keys are the script name and the values are the script
+bodies.  For example, with
+
+    ---
+    script:
+      dir_listing:
+        #!/bin/bash
+        for i in $( ls ); do
+          echo item: $i
+        done
+
+You can get directoy listing with
+
+    % clad cluster dir_listing
+
 # EXAMPLES
 
 Here is an example configuration

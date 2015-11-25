@@ -3,6 +3,7 @@ Revision history for {{$dist->name}}
 {{$NEXT}}
   - Added the --file option
     (requires server 1.01)
+  - Added script configuration item
 
 1.00      2015-11-17 04:57:07 -0500
   - Minor documentation fixes, otherwise identical to

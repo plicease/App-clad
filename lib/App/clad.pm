@@ -117,6 +117,14 @@ sub new
     }
   }
   
+  if($self->config->script(default => {})->{$self->command->[0]})
+  {
+    my $name = shift @{ $self->command };
+    unshift @{ $self->command }, '$SCRIPT1';
+    my $content = $self->config->script(default => {})->{$name};
+    $self->{script} = [ $name => $content ];
+  }
+  
   my $ok = 1;
   
   foreach my $cluster (map { "$_" } $self->clusters)
@@ -152,6 +160,7 @@ sub verbose        { shift->{verbose}       }
 sub serial         { shift->{serial}        }
 sub max            { shift->{max}           }
 sub files          { @{ shift->{files} }    }
+sub script         { @{ shift->{script} // [] } }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
                                                                  -o => 'BatchMode=yes',
@@ -379,6 +388,19 @@ sub new
       $h{mode} = (stat "/etc/passwd")[2] & 0777;
       push @{ $payload->{files} }, \%h;
     }
+  }
+  
+  if($self->clad->script)
+  {
+    my($name, $content) = $self->clad->script;
+    $payload->{require} = '1.01';
+    
+    push @{ $payload->{files} }, {
+      name    => $name,
+      content => $content,
+      mode    => '0700',
+      env     => 'SCRIPT1',
+    };
   }
   
   if($self->clad->fat)
