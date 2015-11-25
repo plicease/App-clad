@@ -55,7 +55,7 @@ which may also contain command aliases and environment settings.
 - --file filename
 
     Copy files to the remote end as part of the payload.  May be specified multiple times.
-    The names of the files are available as environment variables FILE1, FILE2, etc.  The
+    The names of the files are available as environment variables `FILE1`, `FILE2`, etc.  The
     files will automatically be removed when the command completes on the remote end.  An example
     usage for this would be to install rpm packages:
 
@@ -154,7 +154,7 @@ bodies.  For example, with
           echo item: $i
         done
 
-You can get directoy listing with
+You can get directory listing with
 
     % clad cluster dir_listing
 
