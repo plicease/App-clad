@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.010;
 use Test::Clustericious::Config;
-use Test::More tests => 16;
+use Test::More tests => 17;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
 use Path::Class qw( file dir );
@@ -283,15 +283,14 @@ subtest 'pass file to server' => sub {
   plan tests => 5;
 
   local $Clustericious::Admin::Server::VERSION = "1.01";
-  
   my $dir = dir( tempdir( CLEANUP => 1 ) );
   
   generate_stdin {
     command => [$^X, 
       '-MFile::Copy=cp', 
       '-MFile::Spec', 
-      -E => "cp(\$ENV{ROGER}, File::Spec->catfile('$dir', 'text1.txt')) or die \"Copy failed: \$1\";"  .
-            "cp(\$ENV{RAMJET}, File::Spec->catfile('$dir', 'text2.txt')) or die \"Copy failed: \$1\";",
+      -E => "cp(\$ENV{ROGER}, File::Spec->catfile('$dir', 'text1.txt')) or die \"Copy failed: \$!\";"  .
+            "cp(\$ENV{RAMJET}, File::Spec->catfile('$dir', 'text2.txt')) or die \"Copy failed: \$!\";",
     ],
     require => '1.01',
     version => 'dev',
@@ -312,4 +311,42 @@ subtest 'pass file to server' => sub {
   ok(! -x $dir->file('text1.txt'), 'ROGER is NOT executable');
   ok(  -x $dir->file('text2.txt'), 'RAMJET IS executable');
 
+};
+
+subtest 'pass dir to server' => sub {
+
+  local $Clustericious::Admin::Server::VERSION = "1.02";
+  my $dir = dir( tempdir( CLEANUP => 1 ) );
+
+  generate_stdin {
+    command => [$^X, 
+      '-MFile::Copy=cp', 
+      '-MFile::Spec', 
+      -E => "cp(File::Spec->catfile(\$ENV{DIR}, 'subdir1', 'foo', 'text1.txt'), File::Spec->catfile('$dir', 'text1.txt')) or die \"Copy failed: \$!\";"  .
+            "cp(File::Spec->catfile(\$ENV{DIR}, 'another', 'and', 'again', 'text2.txt'), File::Spec->catfile('$dir', 'text2.txt')) or die \"Copy failed: \$!\";",
+    ],
+    require => '1.02',
+    version => 'dev',
+    dir => {
+      'subdir1' => { is_dir => 1, mode => '0700' },
+      'subdir1/foo' => { is_dir => 1, mode => '0700' },
+      'another' => { is_dir => 1 },
+      'another/and' => { is_dir => 1 },
+      'another/and/again' => { is_dir => 1 },
+      
+      'subdir1/foo/text1.txt' => { content => 'text1', mode => '0644' },
+      'another/and/again/text2.txt' => { content => 'text2', mode => '0755' },
+    },
+  };
+
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  
+  note "[out]\n$out" if $out;
+  note "[err]\n$err" if $err;
+  
+  is $exit, 0, 'returns 0';
+  is($dir->file('text1.txt')->slurp, 'text1', 'ROGER content');
+  is($dir->file('text2.txt')->slurp, 'text2', 'RAMJET content');
+  ok(! -x $dir->file('text1.txt'), 'ROGER is NOT executable');
+  ok(  -x $dir->file('text2.txt'), 'RAMJET IS executable');
 };

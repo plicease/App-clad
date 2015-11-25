@@ -5,6 +5,7 @@ use warnings;
 use Sys::Hostname qw( hostname );
 use File::Temp qw( tempdir );
 use File::Spec;
+use File::Path qw( mkpath );
 
 # ABSTRACT: Parallel SSH client server side code
 # VERSION
@@ -119,6 +120,13 @@ sub _server
   #       content: the content of the file
   #       mode: (optional) octal unix permission mode as a string (ie "0755" or "0644")
   #       env: (optional) environment variable to use instead of FILEx
+  #
+  #   dir: optional hash of hash        [ 1.02 ]
+  #     each key is a path
+  #       each value is a hash
+  #         is_dir
+  #         content
+  #         mode
 
   if(ref $payload->{command} ne 'ARRAY' || @{ $payload->{command} } == 0)
   {
@@ -154,13 +162,40 @@ sub _server
     {
       my $path = File::Spec->catfile( tempdir( CLEANUP => 1 ), $file->{name} );
       open my $fh, '>', $path;
+      chmod oct($file->{mode}), $fh if defined $file->{mode};
       binmode $fh;
       print $fh $file->{content};
       close $fh;
-      chmod oct($file->{mode}), $path if defined $file->{mode};
       my $env = $file->{env};
       $env = "FILE@{[ $count++ ]}" unless defined $env;
       $ENV{$env} = $path;
+    }
+  }
+  
+  if($payload->{dir})
+  {
+    my $root = $ENV{DIR} = tempdir( CLEANUP => 1 );
+    
+    foreach my $name (sort keys %{ $payload->{dir} })
+    {
+      my $dir = $payload->{dir}->{$name};
+      next unless $dir->{is_dir};
+      my $path = File::Spec->catdir($root, $name);
+      mkdir $path;
+      chmod oct($dir->{mode}), $path if defined $dir->{mode};
+    }
+    
+    foreach my $name (sort keys %{ $payload->{dir} })
+    {
+      my $file = $payload->{dir}->{$name};
+      next if $file->{is_dir};
+      my $path = File::Spec->catfile($root, $name);
+      $DB::single = 1;
+      open my $fh, '>', $path;
+      chmod oct($file->{mode}), $fh if defined $file->{mode};
+      binmode $fh;
+      print $fh $file->{content};
+      close $fh;
     }
   }
 
