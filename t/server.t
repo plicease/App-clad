@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.010;
 use Test::Clustericious::Config;
-use Test::More tests => 15;
+use Test::More tests => 16;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
 use Path::Class qw( file dir );
@@ -276,5 +276,40 @@ subtest 'pass file to server' => sub {
   is($dir->file('text2.txt')->slurp, 'text2', 'FILE2 content');
   ok(! -x $dir->file('text1.txt'), 'FILE1 is NOT executable');
   ok(  -x $dir->file('text2.txt'), 'FILE2 IS executable');
+
+};
+
+subtest 'pass file to server' => sub {
+  plan tests => 5;
+
+  local $Clustericious::Admin::Server::VERSION = "1.01";
+  
+  my $dir = dir( tempdir( CLEANUP => 1 ) );
+  
+  generate_stdin {
+    command => [$^X, 
+      '-MFile::Copy=cp', 
+      '-MFile::Spec', 
+      -E => "cp(\$ENV{ROGER}, File::Spec->catfile('$dir', 'text1.txt')) or die \"Copy failed: \$1\";"  .
+            "cp(\$ENV{RAMJET}, File::Spec->catfile('$dir', 'text2.txt')) or die \"Copy failed: \$1\";",
+    ],
+    require => '1.01',
+    version => 'dev',
+    files => [
+      { name => 'text1.txt', content => 'text1', mode => '0644', env => 'ROGER'  },
+      { name => 'text2.txt', content => 'text2', mode => '0755', env => 'RAMJET' },
+    ],
+  };
+  
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  
+  note "[out]\n$out" if $out;
+  note "[err]\n$err" if $err;
+  
+  is $exit, 0, 'returns 0';
+  is($dir->file('text1.txt')->slurp, 'text1', 'ROGER content');
+  is($dir->file('text2.txt')->slurp, 'text2', 'RAMJET content');
+  ok(! -x $dir->file('text1.txt'), 'ROGER is NOT executable');
+  ok(  -x $dir->file('text2.txt'), 'RAMJET IS executable');
 
 };

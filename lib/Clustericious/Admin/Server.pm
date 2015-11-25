@@ -118,6 +118,7 @@ sub _server
   #       name: the file basename (no directory)
   #       content: the content of the file
   #       mode: (optional) octal unix permission mode as a string (ie "0755" or "0644")
+  #       env: (optional) environment variable to use instead of FILEx
 
   if(ref $payload->{command} ne 'ARRAY' || @{ $payload->{command} } == 0)
   {
@@ -157,7 +158,9 @@ sub _server
       print $fh $file->{content};
       close $fh;
       chmod oct($file->{mode}), $path if defined $file->{mode};
-      $ENV{"FILE@{[ $count++ ]}"} = $path;
+      my $env = $file->{env};
+      $env = "FILE@{[ $count++ ]}" unless defined $env;
+      $ENV{$env} = $path;
     }
   }
 
