@@ -8,6 +8,9 @@ use Pod::Usage qw( pod2usage );
 use Clustericious::Config 1.03;
 use Term::ANSIColor ();
 use Sys::Hostname qw( hostname );
+use YAML::XS qw( Dump );
+use JSON::MaybeXS qw( encode_json );
+use File::Basename qw( basename );
 use AE;
 
 # ABSTRACT: Parallel SSH client
@@ -238,6 +241,73 @@ sub next_color
   $colors[ ++$self->{next_color} ] // $colors[ $self->{next_color} = 0 ];
 }
 
+sub payload
+{
+  my($self, $clustername) = @_;
+  
+  my %env = $self->config->env( default => {} );
+  $env{CLUSTER}      //= $clustername; # deprecate
+  $env{CLAD_CLUSTER} //= $clustername;
+
+  my $payload = {
+    env     => \%env,
+    command => $self->command,
+    verbose => $self->verbose,
+    version => $App::clad::VERSION // 'dev',
+  };
+  
+  if($self->files)
+  {
+    $payload->{require} = '1.01';
+    
+    foreach my $filename ($self->files)
+    {
+      my %h;
+      open my $fh, '<', $filename;
+      binmode $fh;
+      $h{content} = do { local $/; <$fh> };
+      close $fh;
+      $h{name} = basename $filename;
+      $h{mode} = (stat "/etc/passwd")[2] & 0777;
+      push @{ $payload->{files} }, \%h;
+    }
+  }
+  
+  if($self->script)
+  {
+    my($name, $content) = $self->script;
+    $payload->{require} = '1.01';
+    
+    push @{ $payload->{files} }, {
+      name    => $name,
+      content => $content,
+      mode    => '0700',
+      env     => 'SCRIPT1',
+    };
+  }
+  
+  if($self->fat)
+  {
+    # Perl on the remote end may not have YAML
+    # (actually it may not have JSON::PP either
+    # but at least that is part of the core as
+    # of 5.14).
+    $payload = encode_json($payload);
+    require Clustericious::Admin::Server;
+    open my $fh, '<', $INC{'Clustericious/Admin/Server.pm'};
+    my $code = do { local $/; <$fh> };
+    close $fh;
+    $code =~ s{\s*$}{"\n"}e;
+    $payload = $code . $payload;
+  }
+  else
+  {
+    $payload = Dump($payload);
+  }
+  
+  $payload;
+}
+
 sub run
 {
   my($self) = @_;
@@ -253,9 +323,7 @@ sub run
   {
     my $user = $cluster =~ s/^(.*)@// ? $1 : $self->user;
 
-    my %env = $self->config->env( default => {} );
-    $env{CLUSTER}      //= $cluster; # deprecate
-    $env{CLAD_CLUSTER} //= $cluster;
+    my $payload = $self->payload($cluster);
 
     foreach my $host (@{ $self->cluster_list->{$cluster} })
     {
@@ -267,11 +335,11 @@ sub run
       else
       {
         my $remote = Clustericious::Admin::RemoteHandler->new(
-          prefix => $prefix,
-          clad   => $self,
-          env    => \%env,
-          user   => $user,
-          host   => $host,
+          prefix  => $prefix,
+          clad    => $self,
+          user    => $user,
+          host    => $host,
+          payload => $payload,
         );
 
         my $done = $remote->cv;
@@ -314,9 +382,6 @@ use strict;
 use warnings;
 use AE;
 use AnyEvent::Open3::Simple 0.76;
-use YAML::XS qw( Dump );
-use JSON::MaybeXS qw( encode_json );
-use File::Basename qw( basename );
 
 # VERSION
 
@@ -324,7 +389,7 @@ sub new
 {
   my($class, %args) = @_;
   
-  # args: prefix, clad, env, user, host
+  # args: prefix, clad, user, host, payload
   
   my $self = bless {
     prefix => $args{prefix},
@@ -364,64 +429,6 @@ sub new
     },
   );
   
-  # can/should we generate this payload once, instead
-  # of for each host?
-  my $payload = {
-    env     => $args{env},
-    command => $clad->command,
-    verbose => $clad->verbose,
-    version => $App::clad::VERSION // 'dev',
-  };
-  
-  if($self->clad->files)
-  {
-    $payload->{require} = '1.01';
-    
-    foreach my $filename ($self->clad->files)
-    {
-      my %h;
-      open my $fh, '<', $filename;
-      binmode $fh;
-      $h{content} = do { local $/; <$fh> };
-      close $fh;
-      $h{name} = basename $filename;
-      $h{mode} = (stat "/etc/passwd")[2] & 0777;
-      push @{ $payload->{files} }, \%h;
-    }
-  }
-  
-  if($self->clad->script)
-  {
-    my($name, $content) = $self->clad->script;
-    $payload->{require} = '1.01';
-    
-    push @{ $payload->{files} }, {
-      name    => $name,
-      content => $content,
-      mode    => '0700',
-      env     => 'SCRIPT1',
-    };
-  }
-  
-  if($self->clad->fat)
-  {
-    # Perl on the remote end may not have YAML
-    # (actually it may not have JSON::PP either
-    # but at least that is part of the core as
-    # of 5.14).
-    $payload = encode_json($payload);
-    require Clustericious::Admin::Server;
-    open my $fh, '<', $INC{'Clustericious/Admin/Server.pm'};
-    my $code = do { local $/; <$fh> };
-    close $fh;
-    $code =~ s{\s*$}{"\n"}e;
-    $payload = $code . $payload;
-  }
-  else
-  {
-    $payload = Dump($payload);
-  }
-  
   $ipc->run(
     $clad->ssh_command,
     $clad->ssh_options,
@@ -429,7 +436,7 @@ sub new
     ($args{user} ? ('-l' => $args{user}) : ()),
     $args{host},
     $clad->server_command,
-    \$payload,
+    \$args{payload},
   );
   
   $self;
