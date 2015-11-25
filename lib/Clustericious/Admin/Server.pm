@@ -190,7 +190,6 @@ sub _server
       my $file = $payload->{dir}->{$name};
       next if $file->{is_dir};
       my $path = File::Spec->catfile($root, $name);
-      $DB::single = 1;
       open my $fh, '>', $path;
       chmod oct($file->{mode}), $fh if defined $file->{mode};
       binmode $fh;
