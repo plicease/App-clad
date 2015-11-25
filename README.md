@@ -52,6 +52,15 @@ which may also contain command aliases and environment settings.
 
     Limit the maximum number of simultaneous connections to `number`
 
+- --file filename
+
+    Copy files to the remote end as part of the payload.  May be specified multiple times.
+    The names of the files are available as environment variables FILE1, FILE2, etc.  The
+    files will automatically be removed when the command completes on the remote end.  An example
+    usage for this would be to install rpm packages:
+
+        % clad --file Database-Server-0.01-1.noarch.rp mycluster 'rpm -U $FILE1'
+
 - --help
 
     Print help and exit.

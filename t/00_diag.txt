@@ -2,12 +2,14 @@ AE
 AnyEvent::Open3::Simple
 Capture::Tiny
 Clustericious::Config
+Cpanel::JSON::XS
 EV
 ExtUtils::MakeMaker
 File::HomeDir
 Getopt::Long
 JSON::MaybeXS
 JSON::PP
+JSON::XS
 Path::Class
 Test::Exit
 Test::More

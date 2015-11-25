@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use 5.010;
+use EV;
 use App::clad;
 
 # PODNAME: clad
