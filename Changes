@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+1.01      2015-11-25 21:42:53 +0000
   - Added the --file option
     (requires server 1.01)
   - Added script configuration item
