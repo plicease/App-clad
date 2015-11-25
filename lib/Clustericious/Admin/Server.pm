@@ -113,7 +113,7 @@ sub _server
   #     server should die if requirement isn't met
   #     ignored if set to 'dev'
   #
-  #   files: optional list of hashref
+  #   files: optional list of hashref   [ 1.01 ]
   #     each hashref has:
   #       name: the file basename (no directory)
   #       content: the content of the file
