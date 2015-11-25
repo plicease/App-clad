@@ -3,6 +3,8 @@ package Clustericious::Admin::Server;
 use strict;
 use warnings;
 use Sys::Hostname qw( hostname );
+use File::Temp qw( tempdir );
+use File::Spec;
 
 # ABSTRACT: Parallel SSH client server side code
 # VERSION
@@ -111,6 +113,11 @@ sub _server
   #     server should die if requirement isn't met
   #     ignored if set to 'dev'
   #
+  #   files: optional list of hashref
+  #     each hashref has:
+  #       name: the file basename (no directory)
+  #       content: the content of the file
+  #       mode: (optional) octal unix permission mode as a string (ie "0755" or "0644")
 
   if(ref $payload->{command} ne 'ARRAY' || @{ $payload->{command} } == 0)
   {
@@ -130,15 +137,30 @@ sub _server
     return 2;
   }
   
-  if($payload->{require} && defined $App::clad::VERSION)
+  if($payload->{require} && defined $Clustericious::Admin::Server::VERSION)
   {
-    if($payload->{require} ne 'dev' && $payload->{require} > $App::clad::VERSION)
+    if($payload->{require} ne 'dev' && $payload->{require} > $Clustericious::Admin::Server::VERSION)
     {
-      print STDERR "Clad Server: client requested version @{[ $payload->{require} ]} but this is only $App::clad::VERSION\n";
+      print STDERR "Clad Server: client requested version @{[ $payload->{require} ]} but this is only $Clustericious::Admin::Server::VERSION\n";
       return 2;
     }
   }
-  
+
+  if($payload->{files})
+  {
+    my $count = 1;
+    foreach my $file (@{ $payload->{files} })
+    {
+      my $path = File::Spec->catfile( tempdir( CLEANUP => 1 ), $file->{name} );
+      open my $fh, '>', $path;
+      binmode $fh;
+      print $fh $file->{content};
+      close $fh;
+      chmod oct($file->{mode}), $path if defined $file->{mode};
+      $ENV{"FILE@{[ $count++ ]}"} = $path;
+    }
+  }
+
   $ENV{$_} = $payload->{env}->{$_} for keys %{ $payload->{env} };
   
   system @{ $payload->{command} };

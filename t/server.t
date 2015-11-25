@@ -2,10 +2,10 @@ use strict;
 use warnings;
 use 5.010;
 use Test::Clustericious::Config;
-use Test::More tests => 14;
+use Test::More tests => 15;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
-use Path::Class qw( file );
+use Path::Class qw( file dir );
 use YAML::XS qw( Dump Load );
 
 do {
@@ -216,7 +216,7 @@ subtest 'client must send version' => sub {
 subtest 'server must check version (pass)' => sub {
   plan tests => 1;
   
-  local $App::clad::VERSION = 1.00;
+  local $Clustericious::Admin::Server::VERSION = 1.00;
   
   generate_stdin {
     command => [$^X, -E => ''],
@@ -231,7 +231,7 @@ subtest 'server must check version (pass)' => sub {
 subtest 'server must check version (fail)' => sub {
   plan tests => 2;
 
-  local $App::clad::VERSION = "1.00";
+  local $Clustericious::Admin::Server::VERSION = "1.00";
   
   generate_stdin {
     command => [$^X, -E => ''],
@@ -242,4 +242,39 @@ subtest 'server must check version (fail)' => sub {
   my($out, $err, $exit) = capture { App::clad->new('--server')->run };
   is $exit, 2, 'returns 2';
   like $err, qr{Clad Server: client requested version 2.00 but this is only 1.00}, 'diagnostic';
+};
+
+subtest 'pass file to server' => sub {
+  plan tests => 5;
+
+  local $Clustericious::Admin::Server::VERSION = "1.01";
+  
+  my $dir = dir( tempdir( CLEANUP => 1 ) );
+  
+  generate_stdin {
+    command => [$^X, 
+      '-MFile::Copy=cp', 
+      '-MFile::Spec', 
+      -E => "cp(\$ENV{FILE1}, File::Spec->catfile('$dir', 'text1.txt')) or die \"Copy failed: \$1\";"  .
+            "cp(\$ENV{FILE2}, File::Spec->catfile('$dir', 'text2.txt')) or die \"Copy failed: \$1\";",
+    ],
+    require => '1.01',
+    version => 'dev',
+    files => [
+      { name => 'text1.txt', content => 'text1', mode => '0644' },
+      { name => 'text2.txt', content => 'text2', mode => '0755' },
+    ],
+  };
+  
+  my($out, $err, $exit) = capture { App::clad->new('--server')->run };
+  
+  note "[out]\n$out" if $out;
+  note "[err]\n$err" if $err;
+  
+  is $exit, 0, 'returns 0';
+  is($dir->file('text1.txt')->slurp, 'text1', 'FILE1 content');
+  is($dir->file('text2.txt')->slurp, 'text2', 'FILE2 content');
+  ok(! -x $dir->file('text1.txt'), 'FILE1 is NOT executable');
+  ok(  -x $dir->file('text2.txt'), 'FILE2 IS executable');
+
 };

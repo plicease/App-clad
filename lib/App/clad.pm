@@ -57,6 +57,7 @@ sub new
     fat        => 0,
     max        => 0,
     count      => 0,
+    files      => [],
   }, $class;
   
   my @argv = @_;
@@ -74,6 +75,7 @@ sub new
     'config=s' => \$config_name,
     'fat'      => \$self->{fat},
     'max=s'    => \$self->{max},
+    'file=s'   => $self->{files},
     'help|h'   => sub { pod2usage({ -verbose => 2}) },
     'version'  => sub {
       say STDERR 'App::clad version ', ($App::clad::VERSION // 'dev');
@@ -82,7 +84,7 @@ sub new
   ) || pod2usage(1);
   
   $self->{config} = Clustericious::Config->new($config_name);
-  
+
   return $self if $self->server;
   
   # make sure there is at least one cluster specified
@@ -127,6 +129,13 @@ sub new
     }
   }
   
+  foreach my $file ($self->files)
+  {
+    next if -r $file;
+    say STDERR "unable to find $file";
+    $ok = 0;
+  }
+  
   exit 2 unless $ok;
   
   $self;
@@ -142,6 +151,7 @@ sub server         { shift->{server}        }
 sub verbose        { shift->{verbose}       }
 sub serial         { shift->{serial}        }
 sub max            { shift->{max}           }
+sub files          { @{ shift->{files} }    }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
                                                                  -o => 'BatchMode=yes',
@@ -297,6 +307,7 @@ use AE;
 use AnyEvent::Open3::Simple 0.76;
 use YAML::XS qw( Dump );
 use JSON::MaybeXS qw( encode_json );
+use File::Basename qw( basename );
 
 # VERSION
 
@@ -344,12 +355,31 @@ sub new
     },
   );
   
+  # can/should we generate this payload once, instead
+  # of for each host?
   my $payload = {
     env     => $args{env},
     command => $clad->command,
     verbose => $clad->verbose,
     version => $App::clad::VERSION // 'dev',
   };
+  
+  if($self->clad->files)
+  {
+    $payload->{require} = '1.01';
+    
+    foreach my $filename ($self->clad->files)
+    {
+      my %h;
+      open my $fh, '<', $filename;
+      binmode $fh;
+      $h{content} = do { local $/; <$fh> };
+      close $fh;
+      $h{name} = basename $filename;
+      $h{mode} = (stat "/etc/passwd")[2] & 0777;
+      push @{ $payload->{files} }, \%h;
+    }
+  }
   
   if($self->clad->fat)
   {

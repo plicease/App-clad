@@ -1,12 +1,13 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 6;
+use Test::More tests => 7;
 use App::clad;
 use File::HomeDir;
-use Path::Class qw( file );
+use Path::Class qw( dir file );
 use Clustericious::Config;
 use Capture::Tiny qw( capture );
+use File::Temp qw( tempdir );
 
 my $dist_root = file( __FILE__)->parent->parent->absolute;
 
@@ -14,9 +15,10 @@ note "dist_root = $dist_root";
 
 create_config_ok Clad => {
   env => {},
-  clusters => {
+  cluster => {
     cluster1 => [ qw( host1 host2 host3 ) ],
     cluster2 => [ qw( host4 host5 host6 ) ],
+    cluster3 => [ qw( host1 ) ],
   },
   server_command => 
     "$^X @{[ $dist_root->file('corpus', 'fake-server.pl') ]} --server",
@@ -132,3 +134,34 @@ subtest 'failure' => sub {
   }
 
 };
+
+subtest 'with files' => sub {
+  my $file1 = file( tempdir( CLEANUP => 1 ), 'text1.txt' );
+  my $file2 = file( tempdir( CLEANUP => 1 ), 'text2.txt' );
+  
+  $file1->spew('text1');
+  $file2->spew('text2');
+
+  my $dir = dir( tempdir( CLEANUP => 1 ) );
+
+  my($out, $err, $exit) = capture {
+    App::clad->new(
+      '--file' => $file1,
+      '--file' => $file2,
+      'cluster3', 
+      $^X,
+      '-MFile::Copy=cp',
+      '-MFile::Spec',
+      -E => 
+            "cp(\$ENV{FILE1}, File::Spec->catfile('$dir', 'text1.txt')) or die \"Copy failed: \$1\";" .
+            "cp(\$ENV{FILE2}, File::Spec->catfile('$dir', 'text2.txt')) or die \"Copy failed: \$1\";",
+    )->run;
+  };
+
+  note "[out]\n$out" if $out;
+  note "[err]\n$err" if $err;
+  is $exit, 0, 'exit = 0';
+  is($dir->file('text1.txt')->slurp, 'text1', 'FILE1 content');
+  is($dir->file('text2.txt')->slurp, 'text2', 'FILE2 content');  
+};
+

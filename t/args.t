@@ -5,8 +5,10 @@ use Test::More;
 BEGIN { plan skip_all => 'test requires Test::Exit' unless eval qq{ use Test::Exit; 1 } }
 use App::clad;
 use Capture::Tiny qw( capture );
+use Path::Class qw( file dir );
+use File::Temp qw( tempdir );
 
-plan tests => 15;
+plan tests => 16;
 
 create_config_ok 'Clad', {
   env => {
@@ -136,4 +138,31 @@ subtest 'illegal options as command' => sub {
   my($out, $err, $exit) = capture { exit_code { App::clad->new("cluster1", "--bar") } };
   is $exit, 1, 'exit = 1';
   like $out, qr{Unknown option: bar}, "diagnostic";
+};
+
+subtest 'file' => sub {
+  plan tests => 2;
+
+  my $temp = dir( tempdir( CLEANUP => 1 ) );
+  
+  my $file1 = $temp->file('file1.txt');  
+  my $file2 = $temp->file('file2.txt');  
+  my $file3 = $temp->file('bogus.txt');
+
+  $file1->spew('data');
+  $file2->spew('data');
+
+  subtest 'files exist' => sub {
+    plan tests => 2;
+    my($out, $err, $clad) = capture { App::clad->new('--file' => $file1, "--file" => $file2, "cluster1", "uptime") };
+    isa_ok $clad, 'App::clad';
+    is_deeply [$clad->files], ["$file1","$file2"], 'files';
+  };
+
+  subtest 'file does not exist' => sub {
+    my ($out, $err, $exit) = capture { exit_code { App::clad->new('--file' => $file1, "--file" => $file3, "cluster1", "uptime") } };
+    is $exit, 2, 'exit = 2';
+    like $err, qr{unable to find $file3}, 'diagnostic';
+  };
+
 };
