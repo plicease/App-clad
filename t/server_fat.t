@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use 5.010;
-use Test::More tests => 2;
+use Test::More tests => 1;
 use Capture::Tiny qw( capture );
 use Path::Class qw( file );
 use File::Temp qw( tempdir );
