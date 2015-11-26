@@ -44,9 +44,9 @@ interface.
 # payload is preferred because it is easier to read
 # when things go wrong.  If App::clad is NOT installed
 # on the remote end, then you can take this pm file,
-# append the payload as JSON after the __DATA__ section
-# below and send the server and payload and feed it
-# into perl on the remote end.
+# append the payload as Perl Dump after the __DATA__
+# section below and send the server and payload and
+# feed it into perl on the remote end.
 
 sub _decode
 {
@@ -71,21 +71,27 @@ sub _decode
     }
     print STDERR YAML::XS::Dump($payload) if $payload->{verbose};
   }
-  else
+  elsif($raw =~ /^#perl/)
   {
-    eval {
-      require JSON::PP;
-      $payload = JSON::PP::decode_json($raw);
-    };
-    if(my $json_error = $@)
+    $payload = eval $raw;
+    if(my $perl_error = $@)
     {
-      print STDERR "Clad Server: side YAML/JSON Error:\n";
-      print STDERR $json_error, "\n";
+      print STDERR "Clad Server: side Perl Error:\n";
+      print STDERR $perl_error, "\n";
       print STDERR "payload:\n";
       print STDERR $raw, "\n";
       return;
     }
-    print JSON::PP::encode_json($payload) if $payload->{verbose};
+    eval {
+      require Data::Dumper;
+      print Dumper($payload) if $payload->{verbose};
+    };
+  }
+  else
+  {
+    print STDERR "Clad Server: unable to detect encoding.\n";
+    print STDERR "payload:\n";
+    print STDERR $raw;
   }
   
   $payload;

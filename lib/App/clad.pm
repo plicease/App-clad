@@ -9,10 +9,10 @@ use Clustericious::Config 1.03;
 use Term::ANSIColor ();
 use Sys::Hostname qw( hostname );
 use YAML::XS qw( Dump );
-use JSON::MaybeXS qw( encode_json );
 use File::Basename qw( basename );
 use AE;
 use Clustericious::Admin::RemoteHandler;
+use Clustericious::Admin::Dump qw( perl_dump );
 
 # ABSTRACT: Parallel SSH client
 # VERSION
@@ -290,10 +290,9 @@ sub payload
   if($self->fat)
   {
     # Perl on the remote end may not have YAML
-    # (actually it may not have JSON::PP either
-    # but at least that is part of the core as
-    # of 5.14).
-    $payload = encode_json($payload);
+    # so we dump as Perl data structure
+    # instead.
+    $payload = perl_dump($payload);
     require Clustericious::Admin::Server;
     open my $fh, '<', $INC{'Clustericious/Admin/Server.pm'};
     my $code = do { local $/; <$fh> };

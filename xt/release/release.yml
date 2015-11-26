@@ -15,4 +15,5 @@ pod_coverage:
   private:
     - App::clad
     - Clustericious::Admin::RemoteHandler
+    - Clustericious::Admin::Dump
 

@@ -3,9 +3,9 @@ use warnings;
 use 5.010;
 use Test::More tests => 1;
 use Capture::Tiny qw( capture );
-use JSON::MaybeXS qw( encode_json );
 use Path::Class qw( file );
 use File::Temp qw( tempdir );
+use Clustericious::Admin::Dump qw( perl_dump );
 
 subtest 'basics' => sub {
 
@@ -14,7 +14,7 @@ subtest 'basics' => sub {
   my $payload = file($INC{'Clustericious/Admin/Server.pm'})->slurp;
   $payload =~ s{\s+$}{};
   
-  $payload .= "\n" . encode_json {
+  $payload .= "\n" . perl_dump {
     env => {},
     version => 'dev',
     command => [ $^X, -E => "say 'something to out'; say STDERR 'something to err'" ],
