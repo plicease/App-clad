@@ -24,6 +24,17 @@ subtest 'get server code' => sub {
   note `$remote_perl -v`;
 };
 
+sub run_server
+{
+  my($test_pl) = @_;
+  capture {
+    delete local $ENV{PERL5LIB};
+    delete local $ENV{PERLLIB};
+    system $remote_perl, "$test_pl";
+    $?;
+  };
+}
+
 subtest 'basics' => sub {
 
   plan tests => 3;
@@ -37,12 +48,7 @@ subtest 'basics' => sub {
   my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
   $test_pl->spew($payload);
   
-  my($out, $err, $exit) = capture {
-    delete local $ENV{PERL5LIB};
-    delete local $ENV{PERLLIB};
-    system $remote_perl, "$test_pl";
-    $?;
-  };
+  my($out, $err, $exit) = run_server $test_pl;
 
   is $exit, 0, 'returns 0';
   like $out, qr{something to out}, 'out';
@@ -69,12 +75,7 @@ subtest 'file' => sub {
   my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
   $test_pl->spew($payload);
   
-  my($out, $err, $exit) = capture {
-    delete local $ENV{PERL5LIB};
-    delete local $ENV{PERLLIB};
-    system $remote_perl, "$test_pl";
-    $?;
-  };
+  my($out, $err, $exit) = run_server $test_pl;
 
   is $exit, 0, 'returns 0';
   note "[out]\n$out" if $out;
@@ -93,12 +94,7 @@ subtest 'exit' => sub {
   my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
   $test_pl->spew($payload);
   
-  my($out, $err, $exit) = capture {
-    delete local $ENV{PERL5LIB};
-    delete local $ENV{PERLLIB};
-    system $remote_perl, "$test_pl";
-    $?;
-  };
+  my($out, $err, $exit) = run_server $test_pl;
 
   is $exit >> 8, 22, 'returns 22';
 
