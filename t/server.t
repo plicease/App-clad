@@ -274,9 +274,11 @@ subtest 'pass file to server' => sub {
   is $exit, 0, 'returns 0';
   is($dir->file('text1.txt')->slurp, 'text1', 'FILE1 content');
   is($dir->file('text2.txt')->slurp, 'text2', 'FILE2 content');
-  ok(! -x $dir->file('text1.txt'), 'FILE1 is NOT executable');
-  ok(  -x $dir->file('text2.txt'), 'FILE2 IS executable');
-
+  SKIP: {
+    skip 'File::Copy is too old', 2, unless $] >= 5.012;
+    ok(! -x $dir->file('text1.txt'), 'FILE1 is NOT executable');
+    ok(  -x $dir->file('text2.txt'), 'FILE2 IS executable');
+  }
 };
 
 subtest 'pass file to server' => sub {
@@ -308,12 +310,17 @@ subtest 'pass file to server' => sub {
   is $exit, 0, 'returns 0';
   is($dir->file('text1.txt')->slurp, 'text1', 'ROGER content');
   is($dir->file('text2.txt')->slurp, 'text2', 'RAMJET content');
-  ok(! -x $dir->file('text1.txt'), 'ROGER is NOT executable');
-  ok(  -x $dir->file('text2.txt'), 'RAMJET IS executable');
+  SKIP: {
+    skip 'File::Copy is too old', 2, unless $] >= 5.012;
+    ok(! -x $dir->file('text1.txt'), 'ROGER is NOT executable');
+    ok(  -x $dir->file('text2.txt'), 'RAMJET IS executable');
+  }
 
 };
 
 subtest 'pass dir to server' => sub {
+
+  plan tests => 5;
 
   local $Clustericious::Admin::Server::VERSION = "1.02";
   my $dir = dir( tempdir( CLEANUP => 1 ) );
@@ -347,6 +354,9 @@ subtest 'pass dir to server' => sub {
   is $exit, 0, 'returns 0';
   is($dir->file('text1.txt')->slurp, 'text1', 'ROGER content');
   is($dir->file('text2.txt')->slurp, 'text2', 'RAMJET content');
-  ok(! -x $dir->file('text1.txt'), 'ROGER is NOT executable');
-  ok(  -x $dir->file('text2.txt'), 'RAMJET IS executable');
+  SKIP: {
+    skip 'File::Copy is too old', 2, unless $] >= 5.012;
+    ok(! -x $dir->file('text1.txt'), 'ROGER is NOT executable');
+    ok(  -x $dir->file('text2.txt'), 'RAMJET IS executable');
+  }
 };
