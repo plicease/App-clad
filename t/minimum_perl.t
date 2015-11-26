@@ -1,7 +1,10 @@
 use strict;
 use warnings;
 use Test::More;
-BEGIN { plan skip_all => 'test requires Test::MinimumVersion' unless eval { use Test::MinimumVersion; 1 } }
+BEGIN {
+  plan skip_all => 'test requires Test::MinimumVersion'
+    unless eval q{ use Test::MinimumVersion; 1 };
+}
 
 plan tests => 2;
 
