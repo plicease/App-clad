@@ -222,7 +222,7 @@ sub _server
   return $? >> 8;
 }
 
-__PACKAGE__->_server(*DATA) unless caller;
+exit __PACKAGE__->_server(*DATA) unless caller;
 
 1;
 
