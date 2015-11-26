@@ -10,5 +10,6 @@ Getopt::Long
 Path::Class
 Test::Exit
 Test::More
+Test::Script
 Test::Warn
 YAML::XS

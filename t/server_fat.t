@@ -1,13 +1,38 @@
 use strict;
 use warnings;
 use 5.010;
-use Test::More tests => 4;
+use Test::More tests => 2;
 use Capture::Tiny qw( capture );
 use Path::Class qw( file );
 use File::Temp qw( tempdir );
 use Clustericious::Admin::Dump qw( perl_dump );
+use File::HomeDir;
+use File::Spec;
 
-my $remote_perl = $ENV{CLAD_TEST_REMOTE_PERL} // $^X;
+my @perls = ($^X);
+
+eval '# line '. __LINE__ . ' "' . __FILE__ . qq("\n) . q{
+  use File::Which qw( which );
+  use autodie qw( :system );
+
+  my $pb = which 'perlbrew';
+  die "no perlbrewl" unless $pb;
+  
+  my($out, $err, $exit) = capture { system $pb, 'list'; $? };
+  
+  push @perls, 
+    grep { -x $_ }
+    map { File::Spec->catfile(File::HomeDir->my_home, qw( perl5 perlbrew perls), $_, 'bin', 'perl') } 
+    map { s/^\s*//; $_ } 
+    grep !/\@/, 
+    grep !/^\*/, 
+    split /\n\r?/,
+    $out;
+};
+note "probe for perl brew failed: $@";
+note "perls:";
+note "  +  $_" for @perls;
+
 my $server;
 
 subtest 'get server code' => sub {
@@ -20,13 +45,11 @@ subtest 'get server code' => sub {
   $server =~ s{\s+$}{};
   $server .= "\n";
 
-  note "remote perl: $remote_perl";
-  note `$remote_perl -v`;
 };
 
 sub run_server
 {
-  my($test_pl) = @_;
+  my($remote_perl, $test_pl) = @_;
   capture {
     delete local $ENV{PERL5LIB};
     delete local $ENV{PERLLIB};
@@ -35,67 +58,82 @@ sub run_server
   };
 }
 
-subtest 'basics' => sub {
+subtest 'old perls' => sub {
 
-  plan tests => 3;
+  plan tests => scalar @perls;
 
-  my $payload .= $server . perl_dump {
-    env => {},
-    version => 'dev',
-    command => [ $remote_perl, -e => 'print "something to out\\n"; print STDERR "something to err\\n"' ],
-  };
+  foreach my $remote_perl (@perls) {
 
-  my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
-  $test_pl->spew($payload);
+    subtest "with $remote_perl" => sub {
+
+      plan tests => 3;
+
+      note "remote perl: $remote_perl";
+      note `$remote_perl -v`;
+
+      subtest 'basics' => sub {
+
+        plan tests => 3;
+
+        my $payload .= $server . perl_dump {
+          env => {},
+          version => 'dev',
+          command => [ $remote_perl, -e => 'print "something to out\\n"; print STDERR "something to err\\n"' ],
+        };
+
+        my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
+        $test_pl->spew($payload);
   
-  my($out, $err, $exit) = run_server $test_pl;
+        my($out, $err, $exit) = run_server $remote_perl, $test_pl;
 
-  is $exit, 0, 'returns 0';
-  like $out, qr{something to out}, 'out';
-  like $err, qr{something to err}, 'err';
-};
+        is $exit, 0, 'returns 0';
+        like $out, qr{something to out}, 'out';
+        like $err, qr{something to err}, 'err';
+      };
 
-subtest 'file' => sub {
+      subtest 'file' => sub {
 
-  my $payload .= $server . perl_dump {
-    env => {},
-    version => 'dev',
-    command => [ $remote_perl, -e => q{
-      open IN, "<$ENV{FILE1}";
-      local $/;
-      $data = <IN>;
-      close IN;
-      die "file content did not match" unless $data eq 'rogerramjet';
-    } ],
-    files => [
-      { name => "foo.txt", content => 'rogerramjet' },
-    ],
-  };
+        my $payload .= $server . perl_dump {
+          env => {},
+          version => 'dev',
+          command => [ $remote_perl, -e => q{ 
+            open IN, "<$ENV{FILE1}";
+            local $/;
+            $data = <IN>;
+            close IN;
+            die "file content did not match" unless $data eq 'rogerramjet';
+          } ],
+          files => [
+            { name => "foo.txt", content => 'rogerramjet' },
+          ],
+        };
 
-  my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
-  $test_pl->spew($payload);
+        my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
+        $test_pl->spew($payload);
   
-  my($out, $err, $exit) = run_server $test_pl;
+        my($out, $err, $exit) = run_server $remote_perl, $test_pl;
 
-  is $exit, 0, 'returns 0';
-  note "[out]\n$out" if $out;
-  note "[err]\n$err" if $err;
+        is $exit, 0, 'returns 0';
+        note "[out]\n$out" if $out;
+        note "[err]\n$err" if $err;
 
-};
+      };
 
-subtest 'exit' => sub {
+      subtest 'exit' => sub {
 
-  my $payload .= $server . perl_dump {
-    env => {},
-    version => 'dev',
-    command => [ $remote_perl, -e => 'exit 22' ],
-  };
+        my $payload .= $server . perl_dump {
+          env => {},
+          version => 'dev',
+          command => [ $remote_perl, -e => 'exit 22' ],
+        };
 
-  my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
-  $test_pl->spew($payload);
+        my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
+        $test_pl->spew($payload);
   
-  my($out, $err, $exit) = run_server $test_pl;
+        my($out, $err, $exit) = run_server $remote_perl, $test_pl;
 
-  is $exit >> 8, 22, 'returns 22';
-
+        is $exit >> 8, 22, 'returns 22';
+      }
+    }
+  }
 };
