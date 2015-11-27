@@ -13,6 +13,8 @@ use File::Basename qw( basename );
 use AE;
 use Clustericious::Admin::RemoteHandler;
 use Clustericious::Admin::Dump qw( perl_dump );
+use File::chdir;
+use Path::Class ();
 
 # ABSTRACT: Parallel SSH client
 # VERSION
@@ -80,6 +82,7 @@ sub new
     'fat'      => \$self->{fat},
     'max=s'    => \$self->{max},
     'file=s'   => $self->{files},
+    'dir=s'    => \$self->{dir},
     'help|h'   => sub { pod2usage({ -verbose => 2}) },
     'version'  => sub {
       say STDERR 'App::clad version ', ($App::clad::VERSION // 'dev');
@@ -148,6 +151,12 @@ sub new
     $ok = 0;
   }
   
+  if(defined $self->dir && ! -d $self->dir)
+  {
+    say STDERR "unable to find @{[ $self->dir ]}";
+    $ok = 0;
+  }
+  
   exit 2 unless $ok;
   
   $self;
@@ -164,6 +173,7 @@ sub verbose        { shift->{verbose}       }
 sub serial         { shift->{serial}        }
 sub max            { shift->{max}           }
 sub files          { @{ shift->{files} }    }
+sub dir            { shift->{dir}           }
 sub script         { @{ shift->{script} // [] } }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
@@ -269,7 +279,7 @@ sub payload
       $h{content} = do { local $/; <$fh> };
       close $fh;
       $h{name} = basename $filename;
-      $h{mode} = (stat "/etc/passwd")[2] & 0777;
+      $h{mode} = sprintf "%o", (stat $filename)[2] & 0777;
       push @{ $payload->{files} }, \%h;
     }
   }
@@ -285,6 +295,38 @@ sub payload
       mode    => '0700',
       env     => 'SCRIPT1',
     };
+  }
+  
+  if($self->dir)
+  {
+    $payload->{require} = '1.02';
+    
+    $CWD = $self->dir;
+    
+    my $recurse;
+    $recurse = sub {
+      my($dir) = @_;
+      foreach my $child ($dir->children(no_hidden => 1))
+      {
+        my $key = $child->relative->stringify;
+        if($child->is_dir)
+        {
+          $payload->{dir}->{$key} = {
+            is_dir => 1,
+          };
+          $recurse->($child);
+        }
+        else
+        {
+          $payload->{dir}->{$key} = {
+            content => scalar $child->slurp(iomode => '<:bytes'),
+          };
+        }
+        $payload->{dir}->{$key}->{mode} = sprintf '%o', $child->stat->mode & 0777;
+      }
+    };
+    
+    $recurse->(Path::Class::Dir->new);
   }
   
   if($self->fat)

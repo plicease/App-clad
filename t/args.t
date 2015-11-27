@@ -8,7 +8,7 @@ use Capture::Tiny qw( capture );
 use Path::Class qw( file dir );
 use File::Temp qw( tempdir );
 
-plan tests => 16;
+plan tests => 17;
 
 create_config_ok 'Clad', {
   env => {
@@ -163,6 +163,29 @@ subtest 'file' => sub {
     my ($out, $err, $exit) = capture { exit_code { App::clad->new('--file' => $file1, "--file" => $file3, "cluster1", "uptime") } };
     is $exit, 2, 'exit = 2';
     like $err, qr{unable to find $file3}, 'diagnostic';
+  };
+
+};
+
+subtest '--dir' => sub {
+
+  plan tests => 2;
+
+  my $temp = dir( tempdir( CLEANUP => 1 ) );
+  my $bogus = $temp->subdir('foo');
+  
+  subtest 'dir exists' => sub {
+    plan tests => 2;
+    my($out, $err, $clad) = capture { App::clad->new('--dir' => $temp, "cluster1", "uptime") };
+    isa_ok $clad, 'App::clad';
+    is $clad->dir, "$temp", 'dir';
+  };
+  
+  subtest 'dir does not exist' => sub {
+    plan tests => 2;
+    my ($out, $err, $exit) = capture { exit_code { App::clad->new("--dir" => $bogus, "cluster1", "uptime") } };
+    is $exit, 2, 'exit = 2';
+    like $err, qr{unable to find $bogus}, 'diagnostic';
   };
 
 };

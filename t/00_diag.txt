@@ -6,6 +6,7 @@ Data::Dumper
 EV
 ExtUtils::MakeMaker
 File::HomeDir
+File::chdir
 Getopt::Long
 Path::Class
 Test::Exit

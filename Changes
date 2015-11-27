@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Added the --dir option
+    (requires server 1.02)
   - Use Data::Dumper as fallback instead of JSON::PP.
     Thus in theory should work with a core Perl 5.6.x 
     server side.
