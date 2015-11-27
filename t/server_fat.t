@@ -102,9 +102,12 @@ subtest 'old perls' => sub {
             $data = <IN>;
             close IN;
             die "file content did not match" unless $data eq 'rogerramjet';
+            die "FILE1 is executable" if -x $ENV{FILE1};
+            die "FILE2 is NOT executable" unless -x $ENV{FILE2};
           } ],
           files => [
-            { name => "foo.txt", content => 'rogerramjet' },
+            { name => "foo.txt", content => 'rogerramjet', mode => '0644' },
+            { name => "bar.txt", content => 'morestuff',   mode => '0755' },
           ],
         };
 

@@ -168,7 +168,7 @@ sub _server
     {
       my $path = File::Spec->catfile( tempdir( CLEANUP => 1 ), $file->{name} );
       open my $fh, '>', $path;
-      chmod oct($file->{mode}), $fh if defined $file->{mode};
+      chmod oct($file->{mode}), $path if defined $file->{mode};
       binmode $fh;
       print $fh $file->{content};
       close $fh;
