@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+1.03      2015-11-27 09:41:40 -0500
   - Added the --dir option
     (requires server 1.02)
   - Use Data::Dumper as fallback instead of JSON::PP.
