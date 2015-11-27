@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 8;
+use Test::More tests => 9;
 use App::clad;
 use File::HomeDir;
 use Path::Class qw( dir file );
@@ -195,3 +195,31 @@ subtest myscript => sub {
   
 };
 
+subtest '--dir' => sub {
+
+  my $dir = file(__FILE__)->parent->parent->subdir('corpus')->subdir('dir')->absolute;
+  
+  ok -d "$dir", "dir = $dir";
+
+  my($out, $err, $exit) = capture {
+    App::clad->new(
+      '--dir' => "$dir",
+      'cluster3',
+      $^X,
+      -E => '# line '. __LINE__ . ' "' . __FILE__ . qq("\n) . q{
+        use strict;
+        use warnings;
+        #system 'ls', '-laR', $ENV{DIR};
+        die "no 1.txt" unless -r "1.txt" && -s "1.txt" == 2;
+        die "no sub1/2.txt" unless -r "$ENV{DIR}/sub1/2.txt" && (-s "$ENV{DIR}/sub1/2.txt") == 2;
+        die "no sub1/sub2/3.txt" unless -r "$ENV{DIR}/sub1/sub2/3.txt" && -s "$ENV{DIR}/sub1/sub2/3.txt" == 2;
+        die "no sub1/sub2/sub3/4.txt" unless -r "$ENV{DIR}/sub1/sub2/sub3/4.txt" && -s "$ENV{DIR}/sub1/sub2/sub3/4.txt" == 2;
+        die "we did get sub1/.hidden/bogus.txt" if -e "$ENV{DIR}/sub1/.hidden/bogus.txt";
+      },
+    )->run;
+  };
+  
+  is $exit, 0, 'exit = 0';
+  diag "[out]\n$out" if $out;
+  diag "[err]\n$err" if $err;
+};
