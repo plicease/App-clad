@@ -156,6 +156,11 @@ sub new
     say STDERR "unable to find @{[ $self->dir ]}";
     $ok = 0;
   }
+
+  unless(-t STDIN)
+  {
+    $self->{stdin} = do { local $/; <STDIN> };
+  }
   
   exit 2 unless $ok;
   
@@ -175,6 +180,7 @@ sub max            { shift->{max}           }
 sub files          { @{ shift->{files} }    }
 sub dir            { shift->{dir}           }
 sub script         { @{ shift->{script} // [] } }
+sub stdin          { !! shift->{stdin}      }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
                                                                  -o => 'BatchMode=yes',
@@ -327,6 +333,16 @@ sub payload
     };
     
     $recurse->(Path::Class::Dir->new);
+  }
+
+  if($self->stdin)
+  {
+    $payload->{require} = '1.04';
+    
+    # TODO:
+    # In Perl 5.22 we could refalias this
+    # and save some memory copies.
+    $payload->{stdin} = $self->{stdin};
   }
   
   if($self->fat)

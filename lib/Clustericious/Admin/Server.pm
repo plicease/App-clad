@@ -133,6 +133,8 @@ sub _server
   #         is_dir
   #         content
   #         mode
+  #
+  #   stdin: optional scalar            [ 1.04 ]
 
   if(ref $payload->{command} ne 'ARRAY' || @{ $payload->{command} } == 0)
   {
@@ -205,6 +207,15 @@ sub _server
   }
 
   $ENV{$_} = $payload->{env}->{$_} for keys %{ $payload->{env} };
+  
+  if($payload->{stdin})
+  {
+    my $filename = File::Spec->catfile(tempdir(CLEANUP => 1), 'stdin.txt');
+    open OUT, ">$filename"; 
+    print OUT $payload->{stdin};
+    close OUT;
+    open STDIN, "<$filename";
+  }
   
   system @{ $payload->{command} };
   

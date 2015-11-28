@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 9;
+use Test::More tests => 10;
 use App::clad;
 use File::HomeDir;
 use Path::Class qw( dir file );
@@ -196,6 +196,7 @@ subtest myscript => sub {
 };
 
 subtest '--dir' => sub {
+  plan tests => 2;
 
   my $dir = file(__FILE__)->parent->parent->subdir('corpus')->subdir('dir')->absolute;
   
@@ -223,3 +224,32 @@ subtest '--dir' => sub {
   diag "[out]\n$out" if $out;
   diag "[err]\n$err" if $err;
 };
+
+subtest 'stdin' => sub {
+  plan skip_all => 'borked';
+
+  open STDIN, '<', \"sometext";
+  
+  my($out, $err, $exit) = capture {
+    App::clad->new(
+      '--verbose',
+      'cluster3',
+      $^X,
+      -E => '# line '. __LINE__ . ' "' . __FILE__ . qq("\n) . q{
+        use strict;
+        use warnings;
+        my $data = do { local $/; <STDIN> };
+        die "data does not match: $data" unless $data eq 'sometext';
+        print STDOUT scalar reverse $data;
+      },
+    )->run;
+  };
+  
+  close STDIN;
+  
+  is $exit, 0, 'exit = 0';
+  diag "[out]\n$out" if $out;
+  diag "[err]\n$err" if $err;
+
+};
+

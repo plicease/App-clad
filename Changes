@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - If STDIN is not a tty, then it will be read and
+    passed onto the server.
 
 1.03      2015-11-27 09:41:40 -0500
   - Added the --dir option

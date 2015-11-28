@@ -66,7 +66,7 @@ subtest 'old perls' => sub {
 
     subtest "with $remote_perl" => sub {
 
-      plan tests => 3;
+      plan tests => 4;
 
       note "remote perl: $remote_perl";
       note `$remote_perl -v`;
@@ -75,7 +75,7 @@ subtest 'old perls' => sub {
 
         plan tests => 3;
 
-        my $payload .= $server . perl_dump {
+        my $payload = $server . perl_dump {
           env => {},
           version => 'dev',
           command => [ $remote_perl, -e => 'print "something to out\\n"; print STDERR "something to err\\n"' ],
@@ -92,8 +92,10 @@ subtest 'old perls' => sub {
       };
 
       subtest 'file' => sub {
+      
+        plan tests => 1;
 
-        my $payload .= $server . perl_dump {
+        my $payload = $server . perl_dump {
           env => {},
           version => 'dev',
           command => [ $remote_perl, -e => q{ 
@@ -123,8 +125,9 @@ subtest 'old perls' => sub {
       };
 
       subtest 'exit' => sub {
+        plan tests => 1;
 
-        my $payload .= $server . perl_dump {
+        my $payload = $server . perl_dump {
           env => {},
           version => 'dev',
           command => [ $remote_perl, -e => 'exit 22' ],
@@ -136,7 +139,34 @@ subtest 'old perls' => sub {
         my($out, $err, $exit) = run_server $remote_perl, $test_pl;
 
         is $exit >> 8, 22, 'returns 22';
-      }
+      };
+      
+      subtest 'stdin' => sub {
+        plan tests => 2;
+      
+        my $payload = $server . perl_dump {
+          env => {},
+          version => 'dev',
+          command => [ $remote_perl, -e => '# line '. __LINE__ . ' "' . __FILE__ . qq("\n) . q{
+            undef $/;
+            $data = <STDIN>;
+            die "does not match: $data" if $data ne 'sometext';
+            print scalar reverse $data;
+          } ],
+          stdin => "sometext",
+        };
+
+        my $test_pl = file( tempdir( CLEANUP => 1 ), 'test.pl');
+        $test_pl->spew($payload);
+
+        my($out, $err, $exit) = run_server $remote_perl, $test_pl;
+        
+        is $exit, 0, 'exit = 0 ';
+        is $out, 'txetemos', 'stdout matches';
+        #note "[out]\n$out";
+        diag "[err]\n$err" if $err;
+    
+      };
     }
   }
 };
