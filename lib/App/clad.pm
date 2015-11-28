@@ -160,6 +160,9 @@ sub new
   unless(-t STDIN)
   {
     $self->{stdin} = do { local $/; <STDIN> };
+    delete $self->{stdin}
+      unless defined $self->{stdin}
+      &&     length $self->{stdin};
   }
   
   exit 2 unless $ok;
@@ -167,20 +170,20 @@ sub new
   $self;
 }
 
-sub config         { shift->{config}        }
-sub dry_run        { shift->{dry_run}       }
-sub color          { shift->{color}         }
-sub clusters       { @{ shift->{clusters} } }
-sub command        { shift->{command}       }
-sub user           { shift->{user}          }
-sub server         { shift->{server}        }
-sub verbose        { shift->{verbose}       }
-sub serial         { shift->{serial}        }
-sub max            { shift->{max}           }
-sub files          { @{ shift->{files} }    }
-sub dir            { shift->{dir}           }
+sub config         { shift->{config}            }
+sub dry_run        { shift->{dry_run}           }
+sub color          { shift->{color}             }
+sub clusters       { @{ shift->{clusters} }     }
+sub command        { shift->{command}           }
+sub user           { shift->{user}              }
+sub server         { shift->{server}            }
+sub verbose        { shift->{verbose}           }
+sub serial         { shift->{serial}            }
+sub max            { shift->{max}               }
+sub files          { @{ shift->{files} }        }
+sub dir            { shift->{dir}               }
 sub script         { @{ shift->{script} // [] } }
-sub stdin          { !! shift->{stdin}      }
+sub stdin          { defined shift->{stdin}     }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
                                                                  -o => 'BatchMode=yes',

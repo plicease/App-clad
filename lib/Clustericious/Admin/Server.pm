@@ -208,7 +208,7 @@ sub _server
 
   $ENV{$_} = $payload->{env}->{$_} for keys %{ $payload->{env} };
   
-  if($payload->{stdin})
+  if(defined $payload->{stdin})
   {
     my $filename = File::Spec->catfile(tempdir(CLEANUP => 1), 'stdin.txt');
     open OUT, ">$filename"; 
