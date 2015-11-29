@@ -1,8 +1,12 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+1.04      2015-11-29 12:57:14 -0500
   - If STDIN is not a tty, then it will be read and
     passed onto the server.
+  - Moved repository to clustericious org on github
+    (updated meta appropriately)
 
 1.03      2015-11-27 09:41:40 -0500
   - Added the --dir option
