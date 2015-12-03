@@ -154,6 +154,20 @@ add a few options without replacing the existing set, this is the way to go.
 A list of colors as understood by [Term::ANSIColor](https://metacpan.org/pod/Term::ANSIColor) which are used in alteration
 for each host to help separate the output visually.
 
+## fail\_color
+
+Color to use if clad determined the remote call failed
+
+- exit with non zero
+- killed by signal
+- failed to start (usually due to a bad command)
+
+The default is `bold red`.
+
+## err\_color
+
+Color to use for output to standard error.  The default is `bold yellow`.
+
 ## script
 
 A hash of inline scripts.  The keys are the script name and the values are the script

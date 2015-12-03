@@ -171,6 +171,26 @@ add a few options without replacing the existing set, this is the way to go.
 A list of colors as understood by L<Term::ANSIColor> which are used in alteration
 for each host to help separate the output visually.
 
+=head2 fail_color
+
+Color to use if clad determined the remote call failed
+
+=over 4
+
+=item exit with non zero
+
+=item killed by signal
+
+=item failed to start (usually due to a bad command)
+
+=back
+
+The default is C<bold red>.
+
+=head2 err_color
+
+Color to use for output to standard error.  The default is C<bold yellow>.
+
 =head2 script
 
 A hash of inline scripts.  The keys are the script name and the values are the script
