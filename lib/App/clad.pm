@@ -65,6 +65,7 @@ sub new
     count      => 0,
     summary    => 0,
     files      => [],
+    purge      => 0,
   }, $class;
   
   my @argv = @_;
@@ -85,6 +86,7 @@ sub new
     'file=s'    => $self->{files},
     'dir=s'     => \$self->{dir},
     'summary'   => \$self->{summary},
+    'purge'     => \$self->{purge},
 
     'log'       => sub {
       $self->{log_dir} = Path::Class::Dir->new(
@@ -108,6 +110,7 @@ sub new
   $self->{config} = Clustericious::Config->new($config_name);
 
   return $self if $self->server;
+  return $self if $self->purge;
   
   # make sure there is at least one cluster specified
   # and that it doesn't look like a command line option
@@ -201,6 +204,7 @@ sub script         { @{ shift->{script} // [] } }
 sub stdin          { defined shift->{stdin}     }
 sub summary        { shift->{summary}           }
 sub log_dir        { shift->{log_dir}           }
+sub purge          { shift->{purge}             }
 sub fail_color     { shift->config->fail_color ( default => 'bold red'    ) }
 sub err_color      { shift->config->err_color  ( default => 'bold yellow' ) }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
@@ -393,6 +397,7 @@ sub run
   my($self) = @_;
   
   return $self->run_server if $self->server;
+  return $self->run_purge  if $self->purge;
   
   my $ret = 0;
   my @done;
@@ -456,6 +461,30 @@ sub run_server
 {
   require Clustericious::Admin::Server;
   Clustericious::Admin::Server->_server(*STDIN);
+}
+
+sub run_purge
+{
+  my $log_dir = Path::Class::Dir->new(
+    File::HomeDir->my_dist_data('Clustericious-Admin', { create => 1 } ),
+    'log',
+  );
+  
+  return unless -d $log_dir;
+  
+  foreach my $path ($log_dir->children)
+  {
+    if(-d $path)
+    {
+      say "PURGE DIR  $path";
+      $path->rmtree(1, 1);
+    }
+    else
+    {
+      say "PURGE FILE $path";
+      $path->remove;
+    }
+  }
 }
 
 1;

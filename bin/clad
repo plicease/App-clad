@@ -97,6 +97,10 @@ Specify a directory to write log files to.  Each host will have its own log file
 Same as C<--log-dir>, but the location is chosen by L<File::HomeDir#my_dist_data>
 (using C<Clustericious-Admin> as the dist).
 
+=item --purge
+
+Purge any logs that have collected under your home directory from using the C<--log> option.
+
 =item --help
 
 Print help and exit.

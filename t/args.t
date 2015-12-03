@@ -9,7 +9,7 @@ use Capture::Tiny qw( capture );
 use Path::Class qw( file dir );
 use File::Temp qw( tempdir );
 
-plan tests => 20;
+plan tests => 21;
 
 create_config_ok 'Clad', {
   env => {
@@ -231,5 +231,27 @@ subtest '--log' => sub {
   my($out, $err, $clad) = capture { App::clad->new('--log', 'cluster1', 'uptime') };
   isa_ok $clad, 'App::clad';
   ok -d $clad->log_dir->stringify, "dir = @{[ $clad->log_dir ]}";
+
+};
+
+subtest '--purge' => sub {
+
+  plan tests => 2;
+  
+  subtest with => sub {
+    plan tests => 2;
+
+    my($out, $err, $clad) = capture { App::clad->new('--purge') };
+    isa_ok $clad, 'App::clad';
+    is $clad->purge, 1, 'purge = 1';
+  };
+
+  subtest with => sub {
+    plan tests => 2;
+
+    my($out, $err, $clad) = capture { App::clad->new('cluster1', 'uptime') };
+    isa_ok $clad, 'App::clad';
+    is $clad->purge, 0, 'purge = 0';
+  };
 
 };
