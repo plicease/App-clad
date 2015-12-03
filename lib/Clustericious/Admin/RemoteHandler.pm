@@ -15,9 +15,10 @@ sub new
   # args: prefix, clad, user, host, payload
   
   my $self = bless {
-    prefix => $args{prefix},
-    clad   => $args{clad},
-    cv     => AE::cv,
+    prefix  => $args{prefix},
+    clad    => $args{clad},
+    cv      => AE::cv,
+    summary => $args{clad}->summary,
   }, $class;
   
   my $clad = $args{clad};
@@ -39,7 +40,7 @@ sub new
     },
     on_exit => sub {
       my($proc, $exit, $signal) = @_;
-      $self->print_line(exit => $exit) if $exit;
+      $self->print_line(exit => $exit) if ($self->summary && !$signal) || $exit;
       $self->print_line(sig  => $signal) if $signal;
       $clad->ret(2) if $exit || $signal;
       $done->send;
@@ -65,8 +66,9 @@ sub new
   $self;
 }
 
-sub clad   { shift->{clad} }
-sub prefix { shift->{prefix} }
+sub clad    { shift->{clad}    }
+sub prefix  { shift->{prefix}  }
+sub summary { shift->{summary} }
 
 sub color
 {
@@ -84,10 +86,41 @@ sub print_line
 {
   my($self, $code, $line) = @_;
   
-  print Term::ANSIColor::color($self->color) if $self->is_color;
+  my $last_line = $code =~ /^(exit|sig|fail)$/;
+  
+  return if $self->summary && ! $last_line;
+  
+  if($last_line)
+  {
+    print Term::ANSIColor::color('bold red') if $self->is_color;
+  }
+  else
+  {
+    print Term::ANSIColor::color($self->color) if $self->is_color;
+  }
+
   printf "[%@{[ $self->clad->host_length ]}s %-4s] ", $self->prefix, $code;
-  print Term::ANSIColor::color('reset') if $self->is_color;
-  print $line, "\n";
+
+  if(! $last_line)
+  {
+    if($code eq 'err')
+    {
+      print Term::ANSIColor::color('yellow') if $self->is_color;
+    }
+    else
+    {
+      print Term::ANSIColor::color('reset') if $self->is_color;
+    }
+  }
+  
+  print $line;
+  
+  if($last_line || $code eq 'err')
+  {
+    print Term::ANSIColor::color('reset') if $self->is_color;
+  }
+  
+  print "\n";
 }
 
 sub cv { shift->{cv} }

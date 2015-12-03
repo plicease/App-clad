@@ -63,6 +63,7 @@ sub new
     fat        => 0,
     max        => 0,
     count      => 0,
+    summary    => 0,
     files      => [],
   }, $class;
   
@@ -83,6 +84,7 @@ sub new
     'max=s'    => \$self->{max},
     'file=s'   => $self->{files},
     'dir=s'    => \$self->{dir},
+    'summary'  => \$self->{summary},
     'help|h'   => sub { pod2usage({ -verbose => 2}) },
     'version'  => sub {
       say STDERR 'App::clad version ', ($App::clad::VERSION // 'dev');
@@ -184,6 +186,7 @@ sub files          { @{ shift->{files} }        }
 sub dir            { shift->{dir}               }
 sub script         { @{ shift->{script} // [] } }
 sub stdin          { defined shift->{stdin}     }
+sub summary        { shift->{summary}           }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
                                                                  -o => 'BatchMode=yes',

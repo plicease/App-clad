@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Added the --summary option
 
 1.04      2015-11-29 12:57:14 -0500
   - If STDIN is not a tty, then it will be read and

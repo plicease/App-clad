@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 10;
+use Test::More tests => 11;
 use App::clad;
 use File::HomeDir;
 use Path::Class qw( dir file );
@@ -253,3 +253,33 @@ subtest 'stdin' => sub {
 
 };
 
+subtest 'summary' => sub {
+
+  my($out, $err, $exit) = capture {
+  
+    App::clad->new(
+      '--summary',
+      'cluster1',
+      $^X,
+      -E => '# line '. __LINE__ . ' "' . __FILE__ . qq("\n) . q{
+        say "should not see stdout";
+        say "should not see stderr";
+        exit 2 if $ENV{CLAD_HOST} eq 'host2';
+      },
+    )->run;
+  };
+
+  #note "[out]\n$out" if $out;
+  #note "[err]\n$err" if $err;
+
+  is $exit, 2, 'exit = 2';
+  
+  unlike $out, qr{should not see stdout}, 'do not print stdout';
+  unlike $out, qr{should not see stderr}, 'do not print stderr';
+  
+  is_deeply 
+    [sort split /\r?\n/, $out], 
+    [sort ('[host1 exit] 0', '[host2 exit] 2','[host3 exit] 0')],
+    'printed exit values';
+
+};

@@ -83,6 +83,11 @@ rpm packages:
 
  % clad --dir ~/rpmbuild/RPMS/noarch mycluster 'rpm -U $DIR/*'
 
+=item --summary
+
+Do not print out standard output and standard input, just the exit values or signals returned from
+each host.
+
 =item --help
 
 Print help and exit.

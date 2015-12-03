@@ -69,6 +69,11 @@ which may also contain command aliases and environment settings.
 
         % clad --dir ~/rpmbuild/RPMS/noarch mycluster 'rpm -U $DIR/*'
 
+- --summary
+
+    Do not print out standard output and standard input, just the exit values or signals returned from
+    each host.
+
 - --help
 
     Print help and exit.
