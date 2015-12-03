@@ -30,6 +30,7 @@ sub new
     open(my $fh, '>', "$fn")
       || die "unable to write to $fn $!";
     $self->{logfile} = $fh;
+    $self->{logfilename} = $fn;
   }
   
   my $done = $self->{cv};
@@ -79,6 +80,7 @@ sub clad    { shift->{clad}    }
 sub prefix  { shift->{prefix}  }
 sub summary { shift->{summary} }
 sub logfile { shift->{logfile} }
+sub logfilename { shift->{logfilename} }
 
 sub cleanup
 {
@@ -142,6 +144,11 @@ sub print_line
   }
   
   print "\n";
+  
+  if($fh && $last_line && $line ne '0')
+  {
+    print ' ' x ($self->clad->host_length +8), "see @{[ $self->logfilename ]}\n";
+  }
 }
 
 sub cv { shift->{cv} }

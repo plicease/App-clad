@@ -452,7 +452,7 @@ sub run
   
   $_->recv for @done;
 
-  say "See @{[ $self->log_dir ]} for full log" if $self->log_dir;
+  say "See @{[ $self->log_dir ]} for all logs" if $self->log_dir;
   
   $self->ret;
 }
