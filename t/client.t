@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 11;
+use Test::More tests => 12;
 use App::clad;
 use File::HomeDir;
 use Path::Class qw( dir file );
@@ -262,15 +262,14 @@ subtest 'summary' => sub {
       'cluster1',
       $^X,
       -E => '# line '. __LINE__ . ' "' . __FILE__ . qq("\n) . q{
+        use strict;
+        use warnings;
         say "should not see stdout";
         say "should not see stderr";
         exit 2 if $ENV{CLAD_HOST} eq 'host2';
       },
     )->run;
   };
-
-  #note "[out]\n$out" if $out;
-  #note "[err]\n$err" if $err;
 
   is $exit, 2, 'exit = 2';
   
@@ -281,5 +280,43 @@ subtest 'summary' => sub {
     [sort split /\r?\n/, $out], 
     [sort ('[host1 exit] 0', '[host2 exit] 2','[host3 exit] 0')],
     'printed exit values';
+
+};
+
+subtest 'log' => sub {
+
+  my $dir = dir( tempdir( CLEANUP => 1 ) );
+  
+  my($out, $err, $exit) = capture {
+  
+    App::clad->new(
+      '--log-dir' => "$dir",
+      'cluster1',
+      $^X,
+      -E => '# line '. __LINE__ . ' "' . __FILE__ . qq("\n) . q{
+        use strict;
+        use warnings;
+        say "test output";
+        say STDERR "test error";
+      },
+    )->run;
+  
+  };
+  
+  is $exit, 0, 'exit = 0';
+
+  ok -f $dir->file('host1.log'), 'exists host1.log';
+  ok -f $dir->file('host2.log'), 'exists host2.log';
+  ok -f $dir->file('host3.log'), 'exists host3.log';
+
+  ok( 
+    (scalar grep /^\[err \] test error$/, $dir->file('host1.log')->slurp),
+    'has error'
+  );
+
+  ok( 
+    (scalar grep /^\[out \] test output$/, $dir->file('host1.log')->slurp),
+    'has error'
+  );
 
 };

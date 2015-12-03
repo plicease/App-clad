@@ -2,6 +2,7 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
   - Added the --summary option
+  - Added the --log and --log-dir options
   - Colorize failure and stderr (colors are configurable via fail_color and
     err_color configuration items)
 

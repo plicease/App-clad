@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use File::HomeDir::Test;
 use Test::Clustericious::Config;
 use Test::More;
 BEGIN { plan skip_all => 'test requires Test::Exit' unless eval qq{ use Test::Exit; 1 } }
@@ -8,7 +9,7 @@ use Capture::Tiny qw( capture );
 use Path::Class qw( file dir );
 use File::Temp qw( tempdir );
 
-plan tests => 18;
+plan tests => 20;
 
 create_config_ok 'Clad', {
   env => {
@@ -209,5 +210,26 @@ subtest '--summary' => sub {
     isa_ok $clad, 'App::clad';
     is $clad->summary, 0, 'without --summary';
   };
+
+};
+
+subtest '--log-dir' => sub {
+  plan tests => 3;
+
+  my $dir = dir( tempdir( CLEANUP => 1 ) , 'foo' );
+  
+  my($out, $err, $clad) = capture { App::clad->new('--log-dir' => "$dir", 'cluster1', 'uptime') };
+  isa_ok $clad, 'App::clad';
+  is $clad->log_dir->stringify, "$dir", "dir = dir";
+  ok -d $dir, 'created directory';
+
+};
+
+subtest '--log' => sub {
+  plan tests => 2;
+
+  my($out, $err, $clad) = capture { App::clad->new('--log', 'cluster1', 'uptime') };
+  isa_ok $clad, 'App::clad';
+  ok -d $clad->log_dir->stringify, "dir = @{[ $clad->log_dir ]}";
 
 };

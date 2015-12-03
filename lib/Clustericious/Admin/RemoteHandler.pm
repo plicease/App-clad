@@ -23,6 +23,15 @@ sub new
   
   my $clad = $args{clad};
   
+  # TODO: handle the same host multiple times
+  if($clad->log_dir)
+  {
+    my $fn = $clad->log_dir->file($args{prefix} . ".log");
+    open(my $fh, '>', "$fn")
+      || die "unable to write to $fn $!";
+    $self->{logfile} = $fh;
+  }
+  
   my $done = $self->{cv};
   
   my $ipc = AnyEvent::Open3::Simple->new(
@@ -43,13 +52,13 @@ sub new
       $self->print_line(exit => $exit) if ($self->summary && !$signal) || $exit;
       $self->print_line(sig  => $signal) if $signal;
       $clad->ret(2) if $exit || $signal;
-      $done->send;
+      $self->cleanup;
     },
     on_error => sub {
       my($error) = @_;
       $self->print_line(fail => $error);
       $clad->ret(2);
-      $done->send;
+      $self->cleanup;
     },
   );
   
@@ -62,13 +71,21 @@ sub new
     $clad->server_command,
     \$args{payload},
   );
-  
+
   $self;
 }
 
 sub clad    { shift->{clad}    }
 sub prefix  { shift->{prefix}  }
 sub summary { shift->{summary} }
+sub logfile { shift->{logfile} }
+
+sub cleanup
+{
+  my($self) = @_;
+  $self->logfile->close if $self->logfile;
+  $self->{cv}->send;
+}
 
 sub color
 {
@@ -85,6 +102,10 @@ sub is_color
 sub print_line
 {
   my($self, $code, $line) = @_;
+
+  my $fh = $self->logfile;  
+  printf $fh "[%-4s] %s\n", $code, $line
+    if $fh;
   
   my $last_line = $code =~ /^(exit|sig|fail)$/;
   

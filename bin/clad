@@ -50,7 +50,7 @@ Print out a lot of debugging information which may be useful in debugging issues
 Force clad to wait for the command to finish on each host before continuing to the next.  This
 will be slower, but may be easier to read the output.
 
-=item --config name
+=item --config I<name>
 
 Specify the name of an alternate configuration.  For example if you use C<--config MyClad> then
 the configuration file C<~/etc/MyClad.conf> will be used instead of C<~/etc/Clad.conf>.
@@ -61,11 +61,11 @@ Send the server code with the payload and feed into Perl on the remote end.  Thi
 the total payload much larger, but it allows you to use clad with servers that do not
 have L<App::clad> installed.  The remote end must have Perl 5.6.1 or better in the C<PATH>.
 
-=item --max number
+=item --max I<number>
 
 Limit the maximum number of simultaneous connections to C<number>
 
-=item --file filename
+=item --file I<filename>
 
 Copy files to the remote end as part of the payload.  May be specified multiple times.
 The names of the files are available as environment variables C<FILE1>, C<FILE2>, etc.  The
@@ -74,7 +74,7 @@ usage for this would be to install rpm packages:
 
  % clad --file Database-Server-0.01-1.noarch.rp mycluster 'rpm -U $FILE1'
 
-=item --dir directory
+=item --dir I<directory>
 
 Recursively copy the directory to the remote end as part of the payload.  The name of the directory
 is available as an environment variable C<DIR>.  The directory will automatically be removed on
@@ -87,6 +87,15 @@ rpm packages:
 
 Do not print out standard output and standard input, just the exit values or signals returned from
 each host.
+
+=item --log-dir I<dir>
+
+Specify a directory to write log files to.  Each host will have its own log file.
+
+=item --log
+
+Same as C<--log-dir>, but the location is chosen by L<File::HomeDir#my_dist_data>
+(using C<Clustericious-Admin> as the dist).
 
 =item --help
 

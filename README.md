@@ -36,7 +36,7 @@ which may also contain command aliases and environment settings.
     Force clad to wait for the command to finish on each host before continuing to the next.  This
     will be slower, but may be easier to read the output.
 
-- --config name
+- --config _name_
 
     Specify the name of an alternate configuration.  For example if you use `--config MyClad` then
     the configuration file `~/etc/MyClad.conf` will be used instead of `~/etc/Clad.conf`.
@@ -47,11 +47,11 @@ which may also contain command aliases and environment settings.
     the total payload much larger, but it allows you to use clad with servers that do not
     have [App::clad](https://metacpan.org/pod/App::clad) installed.  The remote end must have Perl 5.6.1 or better in the `PATH`.
 
-- --max number
+- --max _number_
 
     Limit the maximum number of simultaneous connections to `number`
 
-- --file filename
+- --file _filename_
 
     Copy files to the remote end as part of the payload.  May be specified multiple times.
     The names of the files are available as environment variables `FILE1`, `FILE2`, etc.  The
@@ -60,7 +60,7 @@ which may also contain command aliases and environment settings.
 
         % clad --file Database-Server-0.01-1.noarch.rp mycluster 'rpm -U $FILE1'
 
-- --dir directory
+- --dir _directory_
 
     Recursively copy the directory to the remote end as part of the payload.  The name of the directory
     is available as an environment variable `DIR`.  The directory will automatically be removed on
@@ -73,6 +73,15 @@ which may also contain command aliases and environment settings.
 
     Do not print out standard output and standard input, just the exit values or signals returned from
     each host.
+
+- --log-dir _dir_
+
+    Specify a directory to write log files to.  Each host will have its own log file.
+
+- --log
+
+    Same as `--log-dir`, but the location is chosen by [File::HomeDir#my\_dist\_data](https://metacpan.org/pod/File::HomeDir#my_dist_data)
+    (using `Clustericious-Admin` as the dist).
 
 - --help
 

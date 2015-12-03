@@ -73,25 +73,38 @@ sub new
   
   GetOptionsFromArray(
     \@argv,
-    'n'        => \$self->{dry_run},
-    'a'        => sub { $self->{color} = 0 },
-    'l=s'      => \$self->{user},
-    'server'   => \$self->{server},
-    'verbose'  => \$self->{verbose},
-    'serial'   => \$self->{serial},
-    'config=s' => \$config_name,
-    'fat'      => \$self->{fat},
-    'max=s'    => \$self->{max},
-    'file=s'   => $self->{files},
-    'dir=s'    => \$self->{dir},
-    'summary'  => \$self->{summary},
-    'help|h'   => sub { pod2usage({ -verbose => 2}) },
-    'version'  => sub {
+    'n'         => \$self->{dry_run},
+    'a'         => sub { $self->{color} = 0 },
+    'l=s'       => \$self->{user},
+    'server'    => \$self->{server},
+    'verbose'   => \$self->{verbose},
+    'serial'    => \$self->{serial},
+    'config=s'  => \$config_name,
+    'fat'       => \$self->{fat},
+    'max=s'     => \$self->{max},
+    'file=s'    => $self->{files},
+    'dir=s'     => \$self->{dir},
+    'summary'   => \$self->{summary},
+
+    'log'       => sub {
+      $self->{log_dir} = Path::Class::Dir->new(
+        File::HomeDir->my_dist_data('Clustericious-Admin', { create => 1 } ), 
+        'log', 
+        sprintf("%08x.%s", time, $$)
+      );
+    },
+
+    'log-dir=s' => sub { $self->{log_dir} = Path::Class::Dir->new($_[1]) },
+
+    'help|h'    => sub { pod2usage({ -verbose => 2}) },
+    'version'   => sub {
       say STDERR 'App::clad version ', ($App::clad::VERSION // 'dev');
       exit 1;
     },
   ) || pod2usage(1);
   
+  $self->log_dir->mkpath(0,0700) if $self->log_dir;
+
   $self->{config} = Clustericious::Config->new($config_name);
 
   return $self if $self->server;
@@ -187,6 +200,7 @@ sub dir            { shift->{dir}               }
 sub script         { @{ shift->{script} // [] } }
 sub stdin          { defined shift->{stdin}     }
 sub summary        { shift->{summary}           }
+sub log_dir        { shift->{log_dir}           }
 sub fail_color     { shift->config->fail_color ( default => 'bold red'    ) }
 sub err_color      { shift->config->err_color  ( default => 'bold yellow' ) }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
@@ -432,6 +446,8 @@ sub run
   }
   
   $_->recv for @done;
+
+  say "See @{[ $self->log_dir ]} for full log" if $self->log_dir;
   
   $self->ret;
 }
