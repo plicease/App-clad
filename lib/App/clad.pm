@@ -187,6 +187,8 @@ sub dir            { shift->{dir}               }
 sub script         { @{ shift->{script} // [] } }
 sub stdin          { defined shift->{stdin}     }
 sub summary        { shift->{summary}           }
+sub fail_color     { shift->config->fail_color ( default => 'bold red'    ) }
+sub err_color      { shift->config->err_color  ( default => 'bold yellow' ) }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
 sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHostKeyChecking=no', 
                                                                  -o => 'BatchMode=yes',

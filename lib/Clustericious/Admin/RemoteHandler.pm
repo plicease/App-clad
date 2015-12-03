@@ -90,9 +90,9 @@ sub print_line
   
   return if $self->summary && ! $last_line;
   
-  if($last_line)
+  if($last_line && $line ne '0')
   {
-    print Term::ANSIColor::color('bold red') if $self->is_color;
+    print Term::ANSIColor::color($self->clad->fail_color) if $self->is_color;
   }
   else
   {
@@ -105,7 +105,7 @@ sub print_line
   {
     if($code eq 'err')
     {
-      print Term::ANSIColor::color('yellow') if $self->is_color;
+      print Term::ANSIColor::color($self->clad->err_color) if $self->is_color;
     }
     else
     {
