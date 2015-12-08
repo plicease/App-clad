@@ -2,13 +2,11 @@ AE
 AnyEvent::Open3::Simple
 Capture::Tiny
 Clustericious::Config
-Data::Dumper
 EV
 ExtUtils::MakeMaker
 File::HomeDir
 File::HomeDir::Test
 File::chdir
-Getopt::Long
 Path::Class
 Test::Exit
 Test::More
