@@ -1,4 +1,4 @@
-# clad
+# clad [![Build Status](https://secure.travis-ci.org/clustericious/App-clad.png)](http://travis-ci.org/clustericious/App-clad)
 
 Parallel SSH client
 
