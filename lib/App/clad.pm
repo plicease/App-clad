@@ -66,6 +66,7 @@ sub new
     summary    => 0,
     files      => [],
     purge      => 0,
+    list       => 0,
   }, $class;
   
   my @argv = @_;
@@ -87,6 +88,7 @@ sub new
     'dir=s'     => \$self->{dir},
     'summary'   => \$self->{summary},
     'purge'     => \$self->{purge},
+    'list'      => \$self->{list},
 
     'log'       => sub {
       $self->{log_dir} = Path::Class::Dir->new(
@@ -111,6 +113,7 @@ sub new
 
   return $self if $self->server;
   return $self if $self->purge;
+  return $self if $self->list;
   
   # make sure there is at least one cluster specified
   # and that it doesn't look like a command line option
@@ -204,6 +207,7 @@ sub stdin          { defined shift->{stdin}     }
 sub summary        { shift->{summary}           }
 sub log_dir        { shift->{log_dir}           }
 sub purge          { shift->{purge}             }
+sub list           { shift->{list}              }
 sub fail_color     { shift->config->fail_color ( default => 'bold red'    ) }
 sub err_color      { shift->config->err_color  ( default => 'bold yellow' ) }
 sub ssh_command    { shift->config->ssh_command(    default => 'ssh' ) }
@@ -397,6 +401,7 @@ sub run
   
   return $self->run_server if $self->server;
   return $self->run_purge  if $self->purge;
+  return $self->run_list   if $self->list;
   
   my $ret = 0;
   my @done;
@@ -483,6 +488,36 @@ sub run_purge
       say "PURGE FILE $path";
       $path->remove;
     }
+  }
+}
+
+sub run_list
+{
+  my($self) = @_;
+  
+  my @clusters = sort keys %{ $self->cluster_list };
+  
+  my $cluster = shift @clusters;
+  if($cluster)
+  {
+    say "Clusters: $cluster";
+    say "          $_" for @clusters;
+  }
+  else
+  {
+    say "Clusters: [none]";
+  }
+
+  my @alias = sort keys %{ $self->alias };
+  my $alias = shift @alias;
+  if($alias)
+  {
+    say "Aliases:  $alias";
+    say "          $_" for @alias;
+  }
+  else
+  {
+    say "Aliases:  [none]";
   }
 }
 

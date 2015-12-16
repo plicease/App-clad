@@ -87,6 +87,10 @@ which may also contain command aliases and environment settings.
 
     Purge any logs that have collected under your home directory from using the `--log` option.
 
+- --list
+
+    List the clusters and aliases defined in your configuration.
+
 - --help
 
     Print help and exit.
