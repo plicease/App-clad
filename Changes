@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+1.06      2015-12-16 15:13:04 -0500
   - Allow hostname as single host cluster.
   - Added --list option
 
