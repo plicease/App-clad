@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 12;
+use Test::More tests => 14;
 use App::clad;
 use File::HomeDir;
 use Path::Class qw( dir file );
@@ -57,6 +57,23 @@ subtest basic => sub {
     ok $out{"[host$_ out ] host=host$_"},      "host $_ host $_";
   }
   
+};
+
+subtest 'basic single host cluster' => sub {
+  plan tests => 3;
+
+  my($out, $err, $exit) = capture {
+    App::clad->new(
+      'host7', 
+      $^X, -E => 'say "host=$ENV{CLAD_HOST}"; say "cluster=$ENV{CLAD_CLUSTER}"',
+    )->run;
+  };
+  
+  is $exit, 0, 'exit = 0';
+  my %out = map { $_ => 1 }split /\n/, $out;
+  
+  ok $out{"[host7 out ] cluster=host7"},    "host 7 host7";
+  ok $out{"[host7 out ] host=host7"},       "host 7 host7";  
 };
 
 subtest 'basic with deprecated api' => sub {
@@ -320,3 +337,5 @@ subtest 'log' => sub {
   );
 
 };
+
+pass 'good';

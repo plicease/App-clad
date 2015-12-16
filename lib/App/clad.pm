@@ -157,8 +157,7 @@ sub new
     $cluster =~ s/^.*@//;
     unless($self->cluster_list->{$cluster})
     {
-      say STDERR "unknown cluster: $cluster";
-      $ok = 0;
+      $self->cluster_list->{$cluster} = [$cluster];
     }
   }
   

@@ -89,20 +89,16 @@ subtest 'not enough arguments' => sub {
 
 };
 
-subtest 'invalid cluster' => sub {
-  plan tests => 2;
-  my($out, $err, $exit) = capture { exit_code { App::clad->new("foo", "bar") } };
-  is $exit, 2, 'exit = 2';
-  note "[err]\n$err";
-  like $err, qr{unknown cluster: foo}, "diagnostic";
+subtest 'single host as cluster' => sub {
+  plan tests => 1;
+  my($out, $err, $app) = capture { App::clad->new("foo", "bar") };
+  isa_ok $app, 'App::clad';
 };
 
-subtest 'invalid cluster with user' => sub {
-  plan tests => 2;
-  my($out, $err, $exit) = capture { exit_code { App::clad->new('bar@foo', "bar") } };
-  is $exit, 2, 'exit = 2';
-  note "[err]\n$err";
-  like $err, qr{unknown cluster: foo}, "diagnostic";
+subtest 'single host cluster with user' => sub {
+  plan tests => 1;
+  my($out, $err, $app) = capture { App::clad->new('bar@foo', "bar") };
+  isa_ok $app, 'App::clad';
 };
 
 subtest 'server' => sub {

@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Allow hostname as single host cluster.
 
 1.05      2015-12-03 13:38:41 -0500
   - Added the --summary option

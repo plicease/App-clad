@@ -139,6 +139,9 @@ and the lists are the host names.  For example:
 The old key (now deprecated) C<clusters> is also recognized, if C<cluster> is not
 specified.  This deprecated key will be removed on or after January 31 2016.
 
+You can use a single hostname not in the C<cluster> section to specify a cluster
+of one host, so long as it is a legal hostname understood by C<ssh>.
+
 =head2 alias
 
 Hash of aliases.  This is a useful place to specify common shortcuts.  The values
