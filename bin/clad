@@ -17,6 +17,8 @@ __END__
 =head1 SYNOPSIS
 
  clad [options] <cluster> <command>
+ clad --list
+ clad --help
 
 =head1 DESCRIPTION
 

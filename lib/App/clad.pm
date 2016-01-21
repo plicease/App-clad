@@ -117,8 +117,18 @@ sub new
   
   # make sure there is at least one cluster specified
   # and that it doesn't look like a command line option
-  pod2usage({ -exitval => 1, -message => "No clusters specified" })
-    unless @argv;  
+  unless(@argv)
+  {
+    pod2usage({
+      -exitval  => 'NOEXIT',
+      -message  => "No clusters specified", 
+      -sections => [ qw( SYNOPSIS) ],
+      -verbose  => 99,
+    });
+    $self->{list} = 1;
+    $self->ret(1);
+    return $self;
+  }
   pod2usage({ -exitvalue => 1, -message => "Unknown option: $1" })
     if $argv[0] =~ /^--?(.*)$/;
 
@@ -403,7 +413,6 @@ sub run
   return $self->run_purge  if $self->purge;
   return $self->run_list   if $self->list;
   
-  my $ret = 0;
   my @done;
   my $max = $self->max;
 
@@ -519,6 +528,8 @@ sub run_list
   {
     say "Aliases:  [none]";
   }
+
+  $self->ret;
 }
 
 1;

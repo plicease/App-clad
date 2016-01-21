@@ -84,7 +84,7 @@ subtest 'version' => sub {
 subtest 'not enough arguments' => sub {
   plan tests => 2;
 
-  is exit_code { App::clad->new }, 1, 'no args';
+  is(App::clad->new->ret, 1, 'no args');
   is exit_code { App::clad->new('cluster1') }, 1, 'one args';
 
 };
