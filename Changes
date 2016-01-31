@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - As promised, older configuration keys aliases and clusters has been removed
 
 1.06      2015-12-16 15:13:04 -0500
   - Allow hostname as single host cluster.

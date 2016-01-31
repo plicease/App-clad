@@ -240,23 +240,13 @@ sub server_command
 sub alias
 {
   my($self) = @_;
-  $self->config->alias( default => sub {
-    my %deprecated = $self->config->aliases( default => {} );
-    say STDERR "use of aliases key in configuration is deprecated, use alias instead"
-        if %deprecated;
-    \%deprecated;
-  });
+  $self->config->alias( default => {} );
 }
 
 sub cluster_list
 {
   my($self) = @_;
-  $self->config->cluster( default => sub {
-    my %deprecated = $self->config->clusters( default => {} );
-    say STDERR "use of clusters key in configuration is deprecated, use cluster instead"
-        if %deprecated;
-    \%deprecated;
-  });
+  $self->config->cluster( default => {} );
 }
 
 sub ret
