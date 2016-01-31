@@ -1,7 +1,11 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+1.07      2016-01-31 12:08:35 -0500
   - As promised, older configuration keys aliases and clusters has been removed
+  - Default output with no arguments is less verbose.
+    To get the full help text, run clad --help or perldoc clad.
 
 1.06      2015-12-16 15:13:04 -0500
   - Allow hostname as single host cluster.
