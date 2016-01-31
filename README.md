@@ -5,6 +5,8 @@ Parallel SSH client
 # SYNOPSIS
 
     clad [options] <cluster> <command>
+    clad --list
+    clad --help
 
 # DESCRIPTION
 
@@ -123,9 +125,6 @@ and the lists are the host names.  For example:
         - host3
         - host4
 
-The old key (now deprecated) `clusters` is also recognized, if `cluster` is not
-specified.  This deprecated key will be removed on or after January 31 2016.
-
 You can use a single hostname not in the `cluster` section to specify a cluster
 of one host, so long as it is a legal hostname understood by `ssh`.
 
@@ -134,9 +133,6 @@ of one host, so long as it is a legal hostname understood by `ssh`.
 Hash of aliases.  This is a useful place to specify common shortcuts.  The values
 in this hash may be either strings or lists, allowing you to use the list or scalar
 form of system.
-
-The old key (now deprecated) `aliases` is also recognized, if `alias` is not
-specified.  This deprecated key will be removed on or after January 31 2016.
 
 ## server\_command
 

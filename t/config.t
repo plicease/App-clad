@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 3;
+use Test::More tests => 2;
 use App::clad;
 use Capture::Tiny qw( capture );
 
@@ -49,21 +49,4 @@ subtest overrides => sub {
   is($clad->ssh_command, 'xssh', 'clad.ssh_command');
   is_deeply([$clad->ssh_options], [-o => 'Foo=no', -o 'Bar=>yes' ], 'clad.ssh_options');
   is_deeply([$clad->ssh_extra], [ -o => 'LogLevel=ERROR' ], 'clad.ssh_extra');
-};
-
-subtest 'deprecated clusters' => sub {
-  plan tests => 2;
-
-  create_config_ok 'Clad2', {
-    env => {},
-    clusters => {
-      cluster1 => [ qw( host1 host2 host3 ) ],
-      cluster2 => [ qw( host4 host5 host6 ) ],
-    },
-  };
-
-  my($out, $err, $clad) = capture { App::clad->new('--config' => 'Clad2', 'cluster1', 'echo') };
-
-  like $err, qr{use of clusters key in configuration is deprecated, use cluster instead}, 
-    'diagnostic';
 };

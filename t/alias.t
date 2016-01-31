@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Test::Clustericious::Config;
-use Test::More tests => 9;
+use Test::More tests => 8;
 use App::clad;
 use YAML::XS qw( Dump );
 use Capture::Tiny qw( capture );
@@ -68,12 +68,4 @@ create_config_ok Clad2 => {
     foo => 'my foo alias',
     bar => [ qw( my bar alias ) ],
   },
-};
-
-subtest 'deprecation warning' => sub {
-  plan tests => 2;
-  my($out, $err, $clad) = capture { App::clad->new('--config' => 'Clad2', 'cluster1' => 'uptime') };
-  my %alias =$clad->alias;
-  is_deeply \%alias, { foo => 'my foo alias', bar => [ qw( my bar alias ) ] }, 'no aliases';
-  like $err, qr{use of aliases key in configuration is deprecated, use alias instead}, 'deprecation warning';
 };
