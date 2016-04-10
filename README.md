@@ -361,6 +361,19 @@ This environment variable is set to the cluster name from the
 configuration file on each node that the command is run.  The deprecated
 `CLUSTER` is also set, though that may be removed in a future version.
 
+# INSTALL
+
+You can override the default values for the `--fat`, `--server_command` and
+`--fat_server_command` at install time using options to Build.PL.
+
+    perl Build.PL --clad_fat \
+                  --clad_server_command /usr/local/bin/perl \
+                  --server_command /usr/local/bin/perl /usr/local/bin/clad --server
+
+In this example, we specify fully qualified pathnames for Perl and [clad](https://metacpan.org/pod/clad), which
+may be what you want in environments where the system Perl (usually installed in
+`/usr/bin/perl`) comes before the Perl that you want to use.
+
 # CAVEATS
 
 [Clustericious::Admin](https://metacpan.org/pod/Clustericious::Admin) and [clad](https://metacpan.org/pod/clad) require an [AnyEvent](https://metacpan.org/pod/AnyEvent) event loop that allows

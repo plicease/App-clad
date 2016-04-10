@@ -5,6 +5,12 @@ use Test::More tests => 2;
 use App::clad;
 use Capture::Tiny qw( capture );
 
+unshift @INC, sub {
+  my(undef, $filename) = @_;
+  die "do not use ConfigData.pm" if $filename eq 'Clustericious/Admin/ConfigData.pm';
+  return;
+};
+
 subtest defaults => sub {
   plan tests => 6;
 

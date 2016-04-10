@@ -384,6 +384,19 @@ This environment variable is set to the cluster name from the
 configuration file on each node that the command is run.  The deprecated
 C<CLUSTER> is also set, though that may be removed in a future version.
 
+=head1 INSTALL
+
+You can override the default values for the C<--fat>, C<--server_command> and
+C<--fat_server_command> at install time using options to Build.PL.
+
+ perl Build.PL --clad_fat \
+               --clad_server_command /usr/local/bin/perl \
+               --server_command /usr/local/bin/perl /usr/local/bin/clad --server
+
+In this example, we specify fully qualified pathnames for Perl and L<clad>, which
+may be what you want in environments where the system Perl (usually installed in
+C</usr/bin/perl>) comes before the Perl that you want to use.
+
 =head1 CAVEATS
 
 L<Clustericious::Admin> and L<clad> require an L<AnyEvent> event loop that allows

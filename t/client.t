@@ -9,6 +9,12 @@ use Clustericious::Config;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
 
+unshift @INC, sub {
+  my(undef, $filename) = @_;
+  die "do not use ConfigData.pm" if $filename eq 'Clustericious/Admin/ConfigData.pm';
+  return;
+};
+
 my $dist_root = file( __FILE__)->parent->parent->absolute;
 
 note "dist_root = $dist_root";

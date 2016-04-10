@@ -38,6 +38,13 @@ the L<clad> command for the public interface.
 
 =cut
 
+sub _local_default ($$)
+{
+  eval { require Clustericious::Admin::ConfigData }
+    ? Clustericious::Admin::ConfigData->config($_[0])
+    : $_[1];
+}
+
 sub main
 {
   my $clad = shift->new(@_);
@@ -226,15 +233,15 @@ sub ssh_options    { shift->config->ssh_options(    default => [ -o => 'StrictHo
                                                                  -o => 'PasswordAuthentication=no',
                                                                  '-T', ] ) }
 sub ssh_extra      { shift->config->ssh_extra(      default => [] ) }
-sub fat            { my $self = shift; $self->{fat} || $self->config->fat( default => 0 ) }
+sub fat            { my $self = shift; $self->{fat} || $self->config->fat( default => _local_default 'clad_fat', 0 ) }
 
 sub server_command
 {
   my($self) = @_;
   
   $self->fat
-  ? $self->config->fat_server_command( default => 'perl' )
-  : $self->config->server_command(     default => 'clad --server' );
+  ? $self->config->fat_server_command( default => _local_default 'clad_fat_server_command', 'perl' )
+  : $self->config->server_command(     default => _local_default 'clad_server_command', 'clad --server' );
 }
 
 sub alias

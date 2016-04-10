@@ -16,10 +16,10 @@ $modules{$_} = $_ for qw(
   Capture::Tiny
   Clustericious::Config
   EV
-  ExtUtils::MakeMaker
   File::HomeDir
   File::HomeDir::Test
   File::chdir
+  Module::Build
   Path::Class
   Test::Exit
   Test::More
@@ -28,7 +28,18 @@ $modules{$_} = $_ for qw(
   YAML::XS
 );
 
-
+$post_diag = sub {
+  if(eval { require App::clad })
+  {
+    diag "server_command:     ", App::clad::_local_default('clad_server_command',     'no default');
+    diag "fat                 ", App::clad::_local_default('clad_fat',                'no default');
+    diag "fat_server_command: ", App::clad::_local_default('clad_fat_server_command', 'no default');
+  }
+  else
+  {
+    diag "error loading App::clad: $@";
+  }
+};
 
 my @modules = sort keys %modules;
 
