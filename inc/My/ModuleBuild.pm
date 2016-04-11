@@ -9,9 +9,9 @@ sub new
   my($class, %args) = @_;
 
   $args{get_options} = {
-    clad_server_command      => { type => '=s', default => $ENV{CLAD_BUILD_SERVER_COMMAND}     // 'clad --server', },
-    clad_fat                 => {               default => $ENV{CLAD_BUILD_FAT}                // 0,               },
-    clad_fat_server_command  => { type => '=s', default => $ENV{CLAD_BUILD_FAT_SERVER_COMMAND} // 'perl',          },
+    clad_server_command      => { type => '=s', default => 'clad --server', },
+    clad_fat                 => {               default => 0,               },
+    clad_fat_server_command  => { type => '=s', default => 'perl',          },
   };
   
   my $self = $class->SUPER::new(%args);
