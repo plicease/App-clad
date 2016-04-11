@@ -2,6 +2,12 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+1.08      2016-04-11 14:02:57 -0400
+  - Migrated back to Module::Build.
+  - --clad_server_command, --clad_fat_server_command and --clad_fat
+    options to Build.PL can override the default values for the
+    corresponding configuration items.
+
 1.07      2016-01-31 12:08:35 -0500
   - As promised, older configuration keys aliases and clusters has been removed
   - Default output with no arguments is less verbose.
