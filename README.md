@@ -125,6 +125,9 @@ and the lists are the host names.  For example:
         - host3
         - host4
 
+The old key (now deprecated) `clusters` is also recognized, if `cluster` is not
+specified.  This deprecated key will be removed on or after January 31 2016.
+
 You can use a single hostname not in the `cluster` section to specify a cluster
 of one host, so long as it is a legal hostname understood by `ssh`.
 
@@ -133,6 +136,9 @@ of one host, so long as it is a legal hostname understood by `ssh`.
 Hash of aliases.  This is a useful place to specify common shortcuts.  The values
 in this hash may be either strings or lists, allowing you to use the list or scalar
 form of system.
+
+The old key (now deprecated) `aliases` is also recognized, if `alias` is not
+specified.  This deprecated key will be removed on or after January 31 2016.
 
 ## server\_command
 
@@ -306,7 +312,7 @@ probably a little more complicated), so we can use modules that we have installe
 We usually manage these configurations on a cluster by cluster basis using git, and deploy
 them using [clad](https://metacpan.org/pod/clad).
 
-For example, to initialize the configuration directory using the &lt;config\_init> alias:
+For example, to initialize the configuration directory using the <config\_init> alias:
 
     ---
     alias:
