@@ -5,7 +5,6 @@ language: perl
 # which is not what we want since this is a Dist::Zilla dist.
 install:
   - cpanm -n Dist::Zilla
-  - cpanm https://dist.wdlabs.com/Dist-Zilla-PluginBundle-ACPS-0.33.tar.gz
   - dzil authordeps --missing | cpanm -n
   - cpanm -n Pod::Find Test::CPAN::Changes Test::EOL Test::Fixme Test::NoTabs Test::Pod::Spelling::CommonMistakes Test::Spelling Test::Strict Test::Version Test::MinimumVersion || true
   - cpanm -n AnyEvent AnyEvent::Open3::Simple YAML::XS Test::Exit Capture::Tiny Path::Class Clustericious::Config EV Test::Script
