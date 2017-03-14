@@ -1,9 +1,9 @@
 use strict;
 use warnings;
+use Test::Exit;
 use File::HomeDir::Test;
 use Test::Clustericious::Config;
 use Test::More;
-BEGIN { plan skip_all => 'test requires Test::Exit' unless eval qq{ use Test::Exit; 1 } }
 use App::clad;
 use Capture::Tiny qw( capture );
 use Path::Class qw( file dir );
@@ -61,8 +61,14 @@ subtest 'max' => sub {
 };
 
 subtest 'help' => sub {
-  is exit_code { App::clad->new('--help') }, 1, "--help";
-  is exit_code { App::clad->new('-h')     }, 1, "-h";
+  eval {
+    is exit_code { App::clad->new('--help') }, 1, "--help";
+    is exit_code { App::clad->new('-h')     }, 1, "-h";
+  };
+  if(my $error = $@)
+  {
+    fail "unexpected exception: $error";
+  }
 };
 
 subtest 'version' => sub {

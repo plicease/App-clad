@@ -312,7 +312,7 @@ probably a little more complicated), so we can use modules that we have installe
 We usually manage these configurations on a cluster by cluster basis using git, and deploy
 them using [clad](https://metacpan.org/pod/clad).
 
-For example, to initialize the configuration directory using the <config\_init> alias:
+For example, to initialize the configuration directory using the &lt;config\_init> alias:
 
     ---
     alias:
