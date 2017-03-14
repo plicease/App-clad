@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+1.09      2017-03-14 10:59:11 -0400
+  - Fix Test2 / Test::Exit order bug
+
 1.08      2016-04-11 14:02:57 -0400
   - Migrated back to Module::Build.
   - --clad_server_command, --clad_fat_server_command and --clad_fat
