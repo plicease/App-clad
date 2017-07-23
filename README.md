@@ -82,8 +82,7 @@ which may also contain command aliases and environment settings.
 
 - --log
 
-    Same as `--log-dir`, but the location is chosen by [File::HomeDir#my\_dist\_data](https://metacpan.org/pod/File::HomeDir#my_dist_data)
-    (using `Clustericious-Admin` as the dist).
+    Same as `--log-dir`, but the location is ~/clad/log.
 
 - --purge
 

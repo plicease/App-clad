@@ -10,6 +10,7 @@ use Term::ANSIColor ();
 use Sys::Hostname qw( hostname );
 use YAML::XS qw( Dump );
 use File::Basename qw( basename );
+use File::Glob qw( bsd_glob );
 use AE;
 use Clustericious::Admin::RemoteHandler;
 use Clustericious::Admin::Dump qw( perl_dump );
@@ -55,6 +56,13 @@ sub main
 # see t/args.t subtest 'color'
 our $_stdout_is_terminal = sub { -t STDOUT };
 
+sub _rc
+{
+  my $dir = bsd_glob('~/.clad');
+  mkdir $dir unless $dir;
+  $dir;
+}
+
 sub new
 {
   my $class = shift;
@@ -99,7 +107,7 @@ sub new
 
     'log'       => sub {
       $self->{log_dir} = Path::Class::Dir->new(
-        File::HomeDir->my_dist_data('Clustericious-Admin', { create => 1 } ), 
+        _rc(),
         'log', 
         sprintf("%08x.%s", time, $$)
       );
@@ -486,7 +494,7 @@ sub run_server
 sub run_purge
 {
   my $log_dir = Path::Class::Dir->new(
-    File::HomeDir->my_dist_data('Clustericious-Admin', { create => 1 } ),
+    _rc(),
     'log',
   );
   

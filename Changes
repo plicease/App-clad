@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+  - Remove dependency on File::HomeDir
 
 1.09      2017-03-14 10:59:11 -0400
   - Fix Test2 / Test::Exit order bug
