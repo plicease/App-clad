@@ -44,8 +44,8 @@ the L<clad> command for the public interface.
 
 sub _local_default ($$)
 {
-  eval { require Clustericious::Admin::ConfigData }
-    ? Clustericious::Admin::ConfigData->config($_[0])
+  eval { require App::clad::ConfigData }
+    ? App::clad::ConfigData->config($_[0])
     : $_[1];
 }
 
