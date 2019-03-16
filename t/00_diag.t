@@ -14,7 +14,6 @@ $modules{$_} = $_ for qw(
   AE
   AnyEvent::Open3::Simple
   Capture::Tiny
-  Clustericious::Config
   Cpanel::JSON::XS
   EV
   File::ShareDir::Dist
