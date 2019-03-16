@@ -6,6 +6,9 @@ use File::Spec;
 use File::Glob qw( bsd_glob );
 use 5.010001;
 
+# ABSTRACT: Internal machinery for App::clad
+# VERSION
+
 sub _testing
 {
   state $test = 0;

@@ -16,7 +16,6 @@ $modules{$_} = $_ for qw(
   Capture::Tiny
   Cpanel::JSON::XS
   EV
-  File::ShareDir::Dist
   File::chdir
   Getopt::Long
   Hash::Merge
@@ -35,12 +34,12 @@ $modules{$_} = $_ for qw(
   Sys::HostAddr
   Test2::API
   Test2::Plugin::FauxHomeDir
+  Test2::V0
   Test::Exit
   Test::More
   Test::Script
   Test::Warn
   YAML::XS
-  autodie
 );
 
 $post_diag = sub {
