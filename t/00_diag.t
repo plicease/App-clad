@@ -33,7 +33,6 @@ $modules{$_} = $_ for qw(
   Path::Class::File
   Path::Tiny
   Sys::HostAddr
-  Term::Prompt
   Test2::API
   Test2::Plugin::FauxHomeDir
   Test::Exit
