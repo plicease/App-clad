@@ -10,7 +10,7 @@ use File::Path qw( mkpath );
 use Clustericious::Config;
 use Mojo::Loader;
 use Test2::API qw( context );
-use App::clad::Internal;
+use Clustericious::Admin::Internal;
 use base qw( Exporter );
 
 our @EXPORT = qw( create_config_ok create_directory_ok home_directory_ok create_config_helper_ok );
@@ -25,7 +25,7 @@ sub _init
   mkdir $config_dir;
 
   $ENV{CLUSTERICIOUS_CONF_DIR} = $config_dir;
-  App::clad::Internal->_testing(1);
+  Clustericious::Admin::Internal->_testing(1);
 }
 
 BEGIN { _init() }

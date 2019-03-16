@@ -12,7 +12,7 @@ use Clustericious::Config::Helpers ();
 use Mojo::URL;
 use File::Spec;
 use File::Temp ();
-use App::clad::Internal;
+use Clustericious::Admin::Internal;
 use Carp ();
 
 # ABSTRACT: Configuration files for Clustericious nodes.
@@ -76,7 +76,7 @@ sub new {
       ($filename) = 
         List::Util::first { -f $_ } 
         map { File::Spec->catfile($_, "$name.conf") } 
-        App::clad::Internal->_config_path;
+        Clustericious::Admin::Internal->_config_path;
       
       unless($filename)
       {

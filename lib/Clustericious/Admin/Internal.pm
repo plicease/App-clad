@@ -1,4 +1,4 @@
-package App::clad::Internal;
+package Clustericious::Admin::Internal;
 
 use strict;
 use warnings;
