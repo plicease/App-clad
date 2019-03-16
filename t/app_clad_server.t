@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use 5.010;
+use lib 't/lib';
 use Test::Clustericious::Config;
 use Test::More tests => 17;
 use Capture::Tiny qw( capture );

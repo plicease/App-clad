@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use lib 't/lib';
 use Test::Exit;
 use Test2::Plugin::FauxHomeDir;
 use Test::Clustericious::Config;

@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use lib 't/lib';
 use Test::More tests => 5;
 
 use_ok 'App::clad';

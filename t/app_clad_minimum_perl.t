@@ -9,7 +9,7 @@ BEGIN {
 plan tests => 2;
 
 subtest all => sub {
-  all_minimum_version_ok '5.010';
+  all_minimum_version_ok '5.010001';
 };
 
 subtest server => sub {

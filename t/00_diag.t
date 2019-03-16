@@ -15,19 +15,37 @@ $modules{$_} = $_ for qw(
   AnyEvent::Open3::Simple
   Capture::Tiny
   Clustericious::Config
+  Cpanel::JSON::XS
   EV
+  File::ShareDir::Dist
   File::chdir
+  Getopt::Long
+  Hash::Merge
+  JSON::MaybeXS
+  JSON::PP
+  JSON::XS
+  Log::Log4perl
   Module::Build
+  Mojo::Loader
+  Mojo::Template
+  Mojo::URL
   Path::Class
+  Path::Class::Dir
+  Path::Class::File
+  Sys::HostAddr
+  Term::Prompt
+  Test2::API
   Test2::Plugin::FauxHomeDir
   Test::Exit
   Test::More
   Test::Script
   Test::Warn
   YAML::XS
+  autodie
 );
 
 $post_diag = sub {
+  use lib 't/lib';
   if(eval { require App::clad })
   {
     diag "server_command:     ", App::clad::_local_default('clad_server_command',     'no default');

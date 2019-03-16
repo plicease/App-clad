@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use lib 't/lib';
 use Test::Clustericious::Config;
 use Test::More tests => 2;
 use App::clad;

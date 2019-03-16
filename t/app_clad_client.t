@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use lib 't/lib';
 use Test::Clustericious::Config;
 use Test::More tests => 14;
 use App::clad;
@@ -7,6 +8,10 @@ use Path::Class qw( dir file );
 use Clustericious::Config;
 use Capture::Tiny qw( capture );
 use File::Temp qw( tempdir );
+use Env qw( @PERL5LIB );
+use Path::Tiny qw( path );
+
+unshift @PERL5LIB, path('t/lib')->absolute->stringify;
 
 unshift @INC, sub {
   my(undef, $filename) = @_;
