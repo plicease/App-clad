@@ -1,29 +1,25 @@
-use strict;
-use warnings;
+use Test2::V0 -no_srand => 1;
 use lib 't/lib';
 use Test::Clustericious::Config;
 use Clustericious::Config;
-use Test::More tests => 3;
 use File::Temp qw( tempdir );
 
-eval {
+my $mock = do {
   
-  my $dir = tempdir( CLEANUP => 1);
-  my $users_home = sub {
-    $_[1] eq 'foo' ? $dir : '';
-  };
+  my $dir  = tempdir( CLEANUP => 1 );
+  my $dir2 = tempdir( CLEANUP => 1 );
 
-  no warnings 'redefine';
-  *File::HomeDir::Test::users_home =
-  *File::HomeDir::Test::users_home = $users_home;
-  *File::HomeDir::users_home =
-  *File::HomeDir::users_home = $users_home;
+  mock 'File::Glob' => (
+    override => [
+      bsd_glob => sub {
+        my($path) = @_;
+        return $dir  if $path eq '~';
+        return $dir2 if $path eq '~foo';
+        die "path = $path";
+      },
+    ],
+  );
 };
-die $@ if $@;
-
-TODO: {
-
-  local $TODO = 'test was broken with File::HomeDir removal';
 
 create_config_ok 'Foo', <<EOF;
 ---
@@ -39,4 +35,4 @@ ok $dir && -d $dir, "home is $dir and is a dir";
 my $dir2 = eval { $config->bar };
 ok $dir2 && -d $dir2, "home 'foo' is $dir2 and is a dir";
 
-}
+done_testing;
