@@ -32,6 +32,7 @@ $modules{$_} = $_ for qw(
   Path::Class
   Path::Class::Dir
   Path::Class::File
+  Path::Tiny
   Sys::HostAddr
   Term::Prompt
   Test2::API
