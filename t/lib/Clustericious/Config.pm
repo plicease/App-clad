@@ -3,7 +3,6 @@ package Clustericious::Config;
 use strict;
 use warnings;
 use 5.010;
-use Clustericious;
 use List::Util ();
 use YAML::XS ();
 use Mojo::Template;
@@ -13,6 +12,7 @@ use Clustericious::Config::Helpers ();
 use Mojo::URL;
 use File::Spec;
 use File::Temp ();
+use App::clad::Internal;
 use Carp ();
 
 # ABSTRACT: Configuration files for Clustericious nodes.
@@ -76,7 +76,7 @@ sub new {
       ($filename) = 
         List::Util::first { -f $_ } 
         map { File::Spec->catfile($_, "$name.conf") } 
-        Clustericious->_config_path;
+        App::clad::Internal->_config_path;
       
       unless($filename)
       {
