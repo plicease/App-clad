@@ -10,7 +10,6 @@ use File::Path qw( mkpath );
 use Clustericious::Config;
 use Mojo::Loader;
 use Test2::API qw( context );
-use Clustericious::Admin::Internal;
 use base qw( Exporter );
 
 our @EXPORT = qw( create_config_ok create_directory_ok home_directory_ok create_config_helper_ok );
@@ -25,7 +24,7 @@ sub _init
   mkdir $config_dir;
 
   $ENV{CLUSTERICIOUS_CONF_DIR} = $config_dir;
-  Clustericious::Admin::Internal->_testing(1);
+  Clustericious::Config::Util->testing(1);
 }
 
 BEGIN { _init() }
@@ -81,7 +80,7 @@ sub create_config_ok ($;$$)
     $test_name //= "create config for $config_name at $config_filename";
   
     # remove any cached copy if necessary
-    Clustericious::Admin::Internal->_config_uncache($config_name);
+    Clustericious::Config::Util->uncache($config_name);
   }
 
   $ctx->ok($ok, $test_name);

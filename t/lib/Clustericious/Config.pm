@@ -12,8 +12,8 @@ use Clustericious::Config::Helpers ();
 use Mojo::URL;
 use File::Spec;
 use File::Temp ();
-use Clustericious::Admin::Internal;
 use Carp ();
+use File::Glob ();
 
 # ABSTRACT: Configuration files for Clustericious nodes.
 # VERSION
@@ -135,11 +135,37 @@ my %singletons;
 
 my $class_suffix = {};
 
-sub Clustericious::Admin::Internal::_config_uncache {
-  my(undef, $name) = @_;
-  delete $singletons{$name};
-  $class_suffix->{$name} //= 1;
-  $class_suffix->{$name}++;
+{ package Clustericious::Config::Util;
+
+  sub uncache {
+    my(undef, $name) = @_;
+    delete $singletons{$name};
+    $class_suffix->{$name} //= 1;
+    $class_suffix->{$name}++;
+  }
+
+  sub testing
+  {
+    state $test = 0;
+    my(undef, $new) = @_;
+    $test = $new if defined $new;
+    $test;
+  }
+
+  sub path
+  {
+    grep { -d $_ }
+      map { File::Spec->catdir(@$_) } 
+      grep { defined $_->[0] }
+      (
+        [ $ENV{CLUSTERICIOUS_CONF_DIR} ],
+        (!__PACKAGE__->testing) ? (
+          [ File::Glob::bsd_glob('~'), 'etc' ],
+          [ File::Glob::bsd_glob('~/.config/Perl/Clustericious') ],
+          [ '', 'etc' ],
+        ) : (),
+      );
+  }
 }
 
 sub new {
@@ -188,7 +214,7 @@ sub new {
       ($filename) = 
         List::Util::first { -f $_ } 
         map { File::Spec->catfile($_, "$name.conf") } 
-        Clustericious::Admin::Internal->_config_path;
+        Clustericious::Config::Util->path;
       
       unless($filename)
       {
