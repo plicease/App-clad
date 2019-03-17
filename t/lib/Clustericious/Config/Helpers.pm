@@ -15,7 +15,7 @@ our $VERSION = '1.29'; # VERSION
 
 
 our @mergeStack;
-our @EXPORT = qw( extends_config get_password home file dir hostname hostname_full json yaml address public_address interface );
+our @EXPORT = qw( extends_config home file dir hostname hostname_full json yaml address public_address interface );
 
 
 sub extends_config
@@ -46,12 +46,6 @@ sub _do_merges {
     %so_far = %{ merge( \%so_far, \%h ) };
   }
   %$data = %{ merge( \%so_far, $data ) };
-}
-
-
-sub get_password
-{
-  return Clustericious::Config::Callback::Password->new->to_yaml;
 }
 
 
@@ -196,13 +190,6 @@ using L<Clustericious::Config>.
  % extends_config $config_name, %arguments
 
 Extend the config using another config file.
-
-=head2 get_password
-
- <%= get_password %>
-
-Prompt for a password.  This will prompt the user the first time it is
-encountered for a password.
 
 =head2 home
 
