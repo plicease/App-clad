@@ -131,11 +131,12 @@ possible invocations.
 
 =cut
 
-our %singletons;
+my %singletons;
 
-our $class_suffix = {};
+my $class_suffix = {};
+
 sub Clustericious::Admin::Internal::_config_uncache {
-  my($class, $name) = @_;
+  my(undef, $name) = @_;
   delete $singletons{$name};
   $class_suffix->{$name} //= 1;
   $class_suffix->{$name}++;
