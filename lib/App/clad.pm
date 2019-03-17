@@ -17,7 +17,7 @@ use Clustericious::Admin::Dump qw( perl_dump );
 use File::chdir;
 use Path::Class ();
 
-# ABSTRACT: (Deprecated) Parallel SSH client
+# ABSTRACT: Parallel SSH client
 # VERSION
 
 =head1 SYNOPSIS
@@ -25,9 +25,6 @@ use Path::Class ();
  % perldoc clad
 
 =head1 DESCRIPTION
-
-B<NOTE>: This module has been deprecated, and may be removed on or after 31 December 2018.
-Please see L<https://github.com/clustericious/Clustericious/issues/46>.
 
 This module provides the implementation for the L<clad> command.  See 
 the L<clad> command for the public interface.
@@ -258,23 +255,13 @@ sub server_command
 sub alias
 {
   my($self) = @_;
-  $self->config->alias( default => sub {
-    my %deprecated = $self->config->aliases( default => {} );
-    say STDERR "use of aliases key in configuration is deprecated, use alias instead"
-        if %deprecated;
-    \%deprecated;
-  });
+  $self->config->alias( default => {} );
 }
 
 sub cluster_list
 {
   my($self) = @_;
-  $self->config->cluster( default => sub {
-    my %deprecated = $self->config->clusters( default => {} );
-    say STDERR "use of clusters key in configuration is deprecated, use cluster instead"
-        if %deprecated;
-    \%deprecated;
-  });
+  $self->config->cluster( default => {} );
 }
 
 sub ret
@@ -320,7 +307,6 @@ sub payload
   my($self, $clustername) = @_;
   
   my %env = $self->config->env( default => {} );
-  $env{CLUSTER}      //= $clustername; # deprecate
   $env{CLAD_CLUSTER} //= $clustername;
 
   my $payload = {

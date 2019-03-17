@@ -141,9 +141,6 @@ and the lists are the host names.  For example:
      - host4
 
 
-The old key (now deprecated) C<clusters> is also recognized, if C<cluster> is not
-specified.  This deprecated key will be removed on or after January 31 2016.
-
 You can use a single hostname not in the C<cluster> section to specify a cluster
 of one host, so long as it is a legal hostname understood by C<ssh>.
 
@@ -152,9 +149,6 @@ of one host, so long as it is a legal hostname understood by C<ssh>.
 Hash of aliases.  This is a useful place to specify common shortcuts.  The values
 in this hash may be either strings or lists, allowing you to use the list or scalar
 form of system.
-
-The old key (now deprecated) C<aliases> is also recognized, if C<alias> is not
-specified.  This deprecated key will be removed on or after January 31 2016.
 
 =head2 server_command
 
@@ -386,8 +380,7 @@ the list version will be more appropriate
 =head2 CLAD_CLUSTER
 
 This environment variable is set to the cluster name from the 
-configuration file on each node that the command is run.  The deprecated
-C<CLUSTER> is also set, though that may be removed in a future version.
+configuration file on each node that the command is run.
 
 =head1 INSTALL
 
