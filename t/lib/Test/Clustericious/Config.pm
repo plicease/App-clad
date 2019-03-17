@@ -10,6 +10,7 @@ use File::Path qw( mkpath );
 use Clustericious::Config;
 use Mojo::Loader;
 use Test2::API qw( context );
+use Test2::Mock;
 use base qw( Exporter );
 
 our @EXPORT = qw( create_config_ok create_directory_ok home_directory_ok create_config_helper_ok );
@@ -17,14 +18,18 @@ our @EXPORT_OK = @EXPORT;
 our %EXPORT_TAGS = ( all => \@EXPORT );
 
 my $config_dir;
+my $mock;
 
 sub _init
 {
   $config_dir = bsd_glob('~/etc');
   mkdir $config_dir;
-
-  $ENV{CLUSTERICIOUS_CONF_DIR} = $config_dir;
-  Clustericious::Config::Util->testing(1);
+  $mock = Test2::Mock->new( class => 'Clustericious::Config::Util' );
+  $mock->override(
+    path => sub {
+      ($config_dir)
+    },
+  );
 }
 
 BEGIN { _init() }

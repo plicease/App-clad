@@ -144,26 +144,16 @@ my $class_suffix = {};
     $class_suffix->{$name}++;
   }
 
-  sub testing
-  {
-    state $test = 0;
-    my(undef, $new) = @_;
-    $test = $new if defined $new;
-    $test;
-  }
-
   sub path
   {
     grep { -d $_ }
-      map { File::Spec->catdir(@$_) } 
-      grep { defined $_->[0] }
+      map { File::Spec->catdir($_) } 
+      grep { defined $_ }
       (
-        [ $ENV{CLUSTERICIOUS_CONF_DIR} ],
-        (!__PACKAGE__->testing) ? (
-          [ File::Glob::bsd_glob('~'), 'etc' ],
-          [ File::Glob::bsd_glob('~/.config/Perl/Clustericious') ],
-          [ '', 'etc' ],
-        ) : (),
+        $ENV{CLUSTERICIOUS_CONF_DIR},
+        File::Glob::bsd_glob('~/etc'),
+        File::Glob::bsd_glob('~/.config/Perl/Clustericious'),
+        '/etc',
       );
   }
 }
@@ -324,7 +314,6 @@ sub AUTOLOAD {
   $sub->($self);
 }
 
-
 package Clustericious::Config::Callback;
 
 use JSON::MaybeXS qw( encode_json );
@@ -343,17 +332,6 @@ sub to_yaml
 {
   my($self) = @_;
   "!!perl/array:@{[ ref $self ]} @{[ encode_json [@$self] ]}";
-}
-
-package Clustericious::Config::Callback::Password;
-
-use base qw( Clustericious::Config::Callback );
-
-sub execute
-{
-  state $pass;
-  $pass //= do { require Term::Prompt; Term::Prompt::prompt('p', 'Password:', '', '') };
-  $pass;
 }
 
 1;
