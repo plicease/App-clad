@@ -7,7 +7,7 @@ use Hash::Merge qw/merge/;
 use Data::Dumper;
 use Carp qw( croak );
 use base qw( Exporter );
-use JSON::MaybeXS qw( encode_json );
+use Cpanel::JSON::XS qw( encode_json );
 use Clustericious::Config;
 
 our @EXPORT = qw( extends_config home file dir hostname hostname_full json yaml address public_address interface );

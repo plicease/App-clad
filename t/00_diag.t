@@ -19,9 +19,6 @@ $modules{$_} = $_ for qw(
   File::chdir
   Getopt::Long
   Hash::Merge
-  JSON::MaybeXS
-  JSON::PP
-  JSON::XS
   Log::Log4perl
   Module::Build
   Mojo::Loader

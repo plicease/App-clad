@@ -316,7 +316,7 @@ sub AUTOLOAD {
 
 package Clustericious::Config::Callback;
 
-use JSON::MaybeXS qw( encode_json );
+use Cpanel::JSON::XS qw( encode_json );
 
 sub new
 {
