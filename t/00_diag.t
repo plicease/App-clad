@@ -39,7 +39,6 @@ $modules{$_} = $_ for qw(
   Test::Exit
   Test::More
   Test::Script
-  Test::Warn
   YAML::XS
 );
 

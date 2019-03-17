@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use lib 't/lib';
 use Test::Clustericious::Config;
-use Test::More tests => 14;
+use Test::More;
 use App::clad;
 use Path::Class qw( dir file );
 use Clustericious::Config;
@@ -84,28 +84,6 @@ subtest 'basic single host cluster' => sub {
   
   ok $out{"[host7 out ] cluster=host7"},    "host 7 host7";
   ok $out{"[host7 out ] host=host7"},       "host 7 host7";  
-};
-
-subtest 'basic with deprecated api' => sub {
-  plan tests => 8;
-  
-  require_ok 'Clustericious::Admin';
-
-  my($out, $err, $exit) = capture {
-    Clustericious::Admin->run(
-      {}, 'cluster1',
-      $^X, -E => 'say "host=$ENV{CLAD_HOST}"; say "cluster=$ENV{CLAD_CLUSTER}"',
-    );
-  };
-  
-  is $exit, 0, 'exit = 0';
-  my %out = map { $_ => 1 }split /\n/, $out;
-  
-  for(1..3)
-  {
-    ok $out{"[host$_ out ] cluster=cluster1"}, "host $_ cluster 1";
-    ok $out{"[host$_ out ] host=host$_"},      "host $_ host $_";
-  }
 };
 
 subtest 'with specified user' => sub {
@@ -348,4 +326,4 @@ subtest 'log' => sub {
 
 };
 
-pass 'good';
+done_testing;
