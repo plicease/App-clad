@@ -30,7 +30,6 @@ $modules{$_} = $_ for qw(
   Path::Class
   Path::Class::Dir
   Path::Class::File
-  Path::Tiny
   Sys::HostAddr
   Test2::API
   Test2::Mock
