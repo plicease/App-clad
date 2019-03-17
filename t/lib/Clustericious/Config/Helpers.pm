@@ -10,14 +10,32 @@ use base qw( Exporter );
 use JSON::MaybeXS qw( encode_json );
 use Clustericious::Config;
 
-# ABSTRACT: Helpers for clustericious config files.
-our $VERSION = '1.29'; # VERSION
-
-
-our @mergeStack;
 our @EXPORT = qw( extends_config home file dir hostname hostname_full json yaml address public_address interface );
 
+# ABSTRACT: Helpers for clustericious config files.
+# VERSION
 
+=head1 SYNOPSIS
+
+ ---
+ % extend_config 'SomeOtherConfig';
+
+=head1 DESCRIPTION
+
+This module provides the functions available in all configuration files
+using L<Clustericious::Config>.
+
+=head1 FUNCTIONS
+
+=head2 extends_config 
+
+ % extends_config $config_name, %arguments
+
+Extend the config using another config file.
+
+=cut
+
+our @mergeStack;
 sub extends_config
 {
   my($name, @args) = @_;
@@ -49,12 +67,29 @@ sub _do_merges {
 }
 
 
+=head2 home
+
+ <%= home %>
+ <%= home $user %>
+
+Return the given users' home directory, or if no user is
+specified return the calling user's home directory.
+
+=cut
+
 sub home (;$)
 {
   require File::Glob;
   $_[0] ? File::Glob::bsd_glob("~$_[0]") : File::Glob::bsd_glob('~');
 }
 
+=head2 file
+
+ <%= file @list %>
+
+The C<file> shortcut from Path::Class, if it is installed.
+
+=cut
 
 sub file
 {
@@ -63,6 +98,13 @@ sub file
   Path::Class::File->new(@_);
 }
 
+=head2 dir
+
+ <%= dir @list %>
+
+The C<dir> shortcut from Path::Class, if it is installed.
+
+=cut
 
 sub dir
 {
@@ -71,6 +113,13 @@ sub dir
   Path::Class::Dir->new(@_);
 }
 
+=head2 hostname
+
+ <%= hostname %>
+
+The system hostname (uses L<Sys::Hostname>)
+
+=cut
 
 sub hostname
 {
@@ -86,6 +135,14 @@ sub hostname
   $hostname;
 }
 
+=head2 hostname_full
+
+ <%= hostname_full %>
+
+The system hostname in full, including the domain, if
+it can be determined (uses L<Sys::Hostname>).
+
+=cut
 
 sub hostname_full
 {
@@ -93,12 +150,26 @@ sub hostname_full
   Sys::Hostname::hostname();
 }
 
+=head2 json
+
+ <%= json $ref %>
+
+Encode the given hash or list reference.
+
+=cut
 
 sub json ($)
 {
   encode_json($_[0]);
 }
 
+=head2 yaml
+
+ <%= yaml $ref %>
+
+Encode the given hash or list reference.
+
+=cut
 
 sub yaml ($)
 {
@@ -109,6 +180,21 @@ sub yaml ($)
   $str;
 }
 
+=head2 address
+
+ <%= address %>
+ <%= address $interface %>
+
+Returns a list of IP addresses.  Requires L<Sys::HostAddr> to be installed.
+C<$interfaces>, if specified may be either a string or regular expression.
+For example you can do C<address qr{^en[0-9]+$}> on Linux to get only ethernet
+interfaces.
+
+By default does not return loop back interfaces.
+
+Only returns IPv4 addresses.
+
+=cut
 
 # TODO: for now the filtering of loop back only works on Linux
 # and any system where the loopback interface is lo
@@ -142,6 +228,14 @@ sub address (;$)
   map { @{ $_->addresses } } map { Sys::HostAddr->new(ipv => 4, interface => $_) } @if;
 }
 
+=head2 public_address
+
+ <%= public_address %>
+
+Returns the public IPv4 address.  May not be an address on your host, if you
+are behind a firewall.  Requires L<Sys::HostAddr> to be installed.
+
+=cut
 
 sub public_address ()
 {
@@ -149,6 +243,16 @@ sub public_address ()
   Sys::HostAddr->new(ipv=>4)->public;
 }
 
+
+=head2 interface
+
+ <%= join ' ', interfaces %>
+
+Returns a list of network interfaces.  Requires L<Sys::HostAddr> to be installed.
+
+By default does not return loop back interfaces.
+
+=cut
 
 sub interface ()
 {
@@ -159,133 +263,8 @@ sub interface ()
 
 1;
 
-__END__
-
-=pod
-
-=encoding UTF-8
-
-=head1 NAME
-
-Clustericious::Config::Helpers - Helpers for clustericious config files.
-
-=head1 VERSION
-
-version 1.29
-
-=head1 SYNOPSIS
-
- ---
- % extend_config 'SomeOtherConfig';
-
-=head1 DESCRIPTION
-
-This module provides the functions available in all configuration files
-using L<Clustericious::Config>.
-
-=head1 FUNCTIONS
-
-=head2 extends_config 
-
- % extends_config $config_name, %arguments
-
-Extend the config using another config file.
-
-=head2 home
-
- <%= home %>
- <%= home $user %>
-
-Return the given users' home directory, or if no user is
-specified return the calling user's home directory.
-
-=head2 file
-
- <%= file @list %>
-
-The C<file> shortcut from Path::Class, if it is installed.
-
-=head2 dir
-
- <%= dir @list %>
-
-The C<dir> shortcut from Path::Class, if it is installed.
-
-=head2 hostname
-
- <%= hostname %>
-
-The system hostname (uses L<Sys::Hostname>)
-
-=head2 hostname_full
-
- <%= hostname_full %>
-
-The system hostname in full, including the domain, if
-it can be determined (uses L<Sys::Hostname>).
-
-=head2 json
-
- <%= json $ref %>
-
-Encode the given hash or list reference.
-
-=head2 yaml
-
- <%= yaml $ref %>
-
-Encode the given hash or list reference.
-
-=head2 address
-
- <%= address %>
- <%= address $interface %>
-
-Returns a list of IP addresses.  Requires L<Sys::HostAddr> to be installed.
-C<$interfaces>, if specified may be either a string or regular expression.
-For example you can do C<address qr{^en[0-9]+$}> on Linux to get only ethernet
-interfaces.
-
-By default does not return loop back interfaces.
-
-Only returns IPv4 addresses.
-
-=head2 public_address
-
- <%= public_address %>
-
-Returns the public IPv4 address.  May not be an address on your host, if you
-are behind a firewall.  Requires L<Sys::HostAddr> to be installed.
-
-=head2 interface
-
- <%= join ' ', interfaces %>
-
-Returns a list of network interfaces.  Requires L<Sys::HostAddr> to be installed.
-
-By default does not return loop back interfaces.
-
 =head1 SEE ALSO
 
 L<Clustericious::Config>, L<Clustericious>
-
-=head1 AUTHOR
-
-Original author: Brian Duggan
-
-Current maintainer: Graham Ollis E<lt>plicease@cpan.orgE<gt>
-
-Contributors:
-
-Curt Tilmes
-
-Yanick Champoux
-
-=head1 COPYRIGHT AND LICENSE
-
-This software is copyright (c) 2013 by NASA GSFC.
-
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
 
 =cut

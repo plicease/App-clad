@@ -16,19 +16,130 @@ use Clustericious::Admin::Internal;
 use Carp ();
 
 # ABSTRACT: Configuration files for Clustericious nodes.
-our $VERSION = '1.29'; # VERSION
+# VERSION
 
+=head1 SYNOPSIS
+
+In your ~/etc/MyApp.conf file:
+
+ ---
+ % extends_config 'global';
+ % extends_config 'hypnotoad', url => 'http://localhost:9999', app => 'MyApp';
+
+ url : http://localhost:9999
+ start_mode : hypnotoad
+ hypnotoad :
+   - heartbeat_timeout : 500
+ 
+ arbitrary_key: value
+
+In your ~/etc/globa.conf file:
+
+ ---
+ somevar : somevalue
+
+In your ~/etc/hypnotoad.conf:
+
+ listen :
+   - <%= $url %>
+ # home uses ~ to find the calling users'
+ # home directory
+ pid_file : <%= home %>/<%= $app %>/hypnotoad.pid
+ env :
+   MOJO_HOME : <%= home %>/<%= $app %>
+
+From a L<Clustericious::App>:
+
+ package MyApp;
+ 
+ use Mojo::Base qw( Clustericious::App );
+ 
+ package MyApp::Routes;
+ 
+ use Clustericious::RouteBuilder;
+ 
+ get '/' => sub {
+   my $c = shift;
+   my $config = $c; # $config isa Clustericious::Config
+   
+   # returns the value if it is defined, foo otherwise
+   my $value1 = $config->arbitrary_key1(default => 'foo');
+   
+   # returns the value if it is defined, bar otherwise
+   # code reference is only called if the value is NOT
+   # defined
+   my $value2 = $config->arbitrary_key2(default => sub { 'bar' });
+ };
+
+From a script:
+
+ use Clustericious::Config;
+ 
+ my $c = Clustericious::Config->new("MyApp");
+ my $c = Clustericious::Config->new( \%config_data_structure );
+
+ print $c->url;
+ print $c->{url};
+
+ print $c->hypnotoad->listen;
+ print $c->hypnotoad->{listen};
+ my %hash = $c->hypnotoad;
+ my @ary  = $c->hypnotoad;
+
+ # Supply a default value for a missing configuration parameter :
+ $c->url(default => "http://localhost:9999");
+ print $c->this_param_is_missing(default => "something_else");
+
+=head1 DESCRIPTION
+
+Clustericious::Config reads configuration files which are Mojo::Template's
+of JSON or YAML files.  There should generally be an entry for
+'url', which may be used by either a client or a server depending on
+how this node in the cluster is being used.
+
+After rendering the template and parsing the JSON, the resulting
+object may be called using method calls or treated as hashes.
+
+Config files are looked for in the following places (in order, where
+"MyApp" is the name of the app) :
+
+ $CLUSTERICIOUS_CONF_DIR/MyApp.conf
+ $HOME/etc/MyApp.conf
+ /etc/MyApp.conf
+
+The helper "extends_config" may be used to read default settings
+from another config file.  The first argument to extends_config is the
+basename of the config file.  Additional named arguments may be passed
+to that config file and used as variables within that file.  After
+reading another file, the hashes are merged (i.e. with Hash::Merge);
+so values anywhere inside the data structure may be overridden.
+
+YAML config files must begin with "---", otherwise they are interpreted
+as JSON.
+
+This module provides a number of helpers
+which can be used to get system details (such as the home directory of
+the calling user or to prompt for passwords).  See L<Clustericious::Config::Helpers>
+for details.
+
+=head1 CONSTRUCTOR
+
+=head2 new
+
+Create a new Clustericious::Config object.  See the SYNOPSIS for
+possible invocations.
+
+=cut
 
 our %singletons;
 
 our $class_suffix = {};
-sub Clustericious::_config_uncache {
+sub Clustericious::Admin::Internal::_config_uncache {
   my($class, $name) = @_;
   delete $singletons{$name};
   $class_suffix->{$name} //= 1;
   $class_suffix->{$name}++;
 }
-
 
 sub new {
   my $class = shift;
@@ -220,131 +331,6 @@ sub execute
 
 1;
 
-__END__
-
-=pod
-
-=encoding UTF-8
-
-=head1 NAME
-
-Clustericious::Config - Configuration files for Clustericious nodes.
-
-=head1 VERSION
-
-version 1.29
-
-=head1 SYNOPSIS
-
-In your ~/etc/MyApp.conf file:
-
- ---
- % extends_config 'global';
- % extends_config 'hypnotoad', url => 'http://localhost:9999', app => 'MyApp';
-
- url : http://localhost:9999
- start_mode : hypnotoad
- hypnotoad :
-   - heartbeat_timeout : 500
- 
- arbitrary_key: value
-
-In your ~/etc/globa.conf file:
-
- ---
- somevar : somevalue
-
-In your ~/etc/hypnotoad.conf:
-
- listen :
-   - <%= $url %>
- # home uses ~ to find the calling users'
- # home directory
- pid_file : <%= home %>/<%= $app %>/hypnotoad.pid
- env :
-   MOJO_HOME : <%= home %>/<%= $app %>
-
-From a L<Clustericious::App>:
-
- package MyApp;
- 
- use Mojo::Base qw( Clustericious::App );
- 
- package MyApp::Routes;
- 
- use Clustericious::RouteBuilder;
- 
- get '/' => sub {
-   my $c = shift;
-   my $config = $c; # $config isa Clustericious::Config
-   
-   # returns the value if it is defined, foo otherwise
-   my $value1 = $config->arbitrary_key1(default => 'foo');
-   
-   # returns the value if it is defined, bar otherwise
-   # code reference is only called if the value is NOT
-   # defined
-   my $value2 = $config->arbitrary_key2(default => sub { 'bar' });
- };
-
-From a script:
-
- use Clustericious::Config;
- 
- my $c = Clustericious::Config->new("MyApp");
- my $c = Clustericious::Config->new( \%config_data_structure );
-
- print $c->url;
- print $c->{url};
-
- print $c->hypnotoad->listen;
- print $c->hypnotoad->{listen};
- my %hash = $c->hypnotoad;
- my @ary  = $c->hypnotoad;
-
- # Supply a default value for a missing configuration parameter :
- $c->url(default => "http://localhost:9999");
- print $c->this_param_is_missing(default => "something_else");
-
-=head1 DESCRIPTION
-
-Clustericious::Config reads configuration files which are Mojo::Template's
-of JSON or YAML files.  There should generally be an entry for
-'url', which may be used by either a client or a server depending on
-how this node in the cluster is being used.
-
-After rendering the template and parsing the JSON, the resulting
-object may be called using method calls or treated as hashes.
-
-Config files are looked for in the following places (in order, where
-"MyApp" is the name of the app) :
-
- $CLUSTERICIOUS_CONF_DIR/MyApp.conf
- $HOME/etc/MyApp.conf
- /etc/MyApp.conf
-
-The helper "extends_config" may be used to read default settings
-from another config file.  The first argument to extends_config is the
-basename of the config file.  Additional named arguments may be passed
-to that config file and used as variables within that file.  After
-reading another file, the hashes are merged (i.e. with Hash::Merge);
-so values anywhere inside the data structure may be overridden.
-
-YAML config files must begin with "---", otherwise they are interpreted
-as JSON.
-
-This module provides a number of helpers
-which can be used to get system details (such as the home directory of
-the calling user or to prompt for passwords).  See L<Clustericious::Config::Helpers>
-for details.
-
-=head1 CONSTRUCTOR
-
-=head2 new
-
-Create a new Clustericious::Config object.  See the SYNOPSIS for
-possible invocations.
-
 =head1 CAVEATS
 
 Some filesystems do not support filenames with a colon (:) character in 
@@ -359,24 +345,5 @@ C<new>, C<can>, C<isa>, etc.
 =head1 SEE ALSO
 
 L<Mojo::Template>, L<Hash::Merge>, L<Clustericious>, L<Clustericious::Client>, L<Clustericious::Config::Helpers>
-
-=head1 AUTHOR
-
-Original author: Brian Duggan
-
-Current maintainer: Graham Ollis E<lt>plicease@cpan.orgE<gt>
-
-Contributors:
-
-Curt Tilmes
-
-Yanick Champoux
-
-=head1 COPYRIGHT AND LICENSE
-
-This software is copyright (c) 2013 by NASA GSFC.
-
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
 
 =cut

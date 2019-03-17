@@ -5,7 +5,7 @@ use warnings;
 use 5.010;
 use Getopt::Long 1.24 qw( GetOptionsFromArray :config pass_through);
 use Pod::Usage qw( pod2usage );
-use Clustericious::Config 1.03;
+use Clustericious::Config;
 use Term::ANSIColor ();
 use Sys::Hostname qw( hostname );
 use YAML::XS qw( Dump );
